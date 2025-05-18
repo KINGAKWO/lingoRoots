@@ -1,12 +1,11 @@
 import logo from './logo.svg';
-import './App.css';
-
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import { auth } from './firebase'; // Import auth from your firebase.js
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import SignUp from './components/SignUp';
 import SignIn from './components/SignIn';
+import LanguageDashboard from './components/LanguageDashboards';
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -44,7 +43,8 @@ function App() {
           <div>
             <p>Welcome, {currentUser.email}!</p>
             <button onClick={handleSignOut}>Sign Out</button>
-            {/* Add your main app content here for logged-in users */}
+            <hr />
+            <LanguageDashboard />
           </div>
         ) : (
           <div>
