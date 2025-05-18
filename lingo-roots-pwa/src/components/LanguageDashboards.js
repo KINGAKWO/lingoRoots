@@ -3,7 +3,7 @@ import { db } from '../firebase'; // Import Firestore instance
 import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import LessonList from './LessonList'; // We'll create this next
 
-const LanguageDashboard = ({ languageId = "duala" }) => { // Defaulting to ghomala for MVP
+const LanguageDashboard = ({ languageId = "Duala" }) => { // Defaulting to ghomala for MVP
   const [language, setLanguage] = useState(null);
   const [lessons, setLessons] = useState([]);
   const [loading, setLoading] = useState(true);
