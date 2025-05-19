@@ -11,17 +11,20 @@ const VocabularyList = ({ lessonId, languageId }) => {
 
   useEffect(() => {
     const fetchVocabulary = async () => {
-      if (!lessonId) return;
+      if (!lessonId || !languageId) return;
       setLoading(true);
       setError(null);
+      setVocabulary([]);
+      setAudioUrls({});
       try {
+        const vocabPath = `languages/${languageId}/vocabularyItems`; // Path to the subcollection
         const vocabQuery = query(
-          collection(db, "vocabularyItems"),
-          where("lessonId", "==", lessonId),
-          where("languageId", "==", languageId)
+          collection(db, vocabPath),
+          where("lessonId", "==", lessonId)
           // Optionally add orderBy if you have an order field for vocab items
         );
         const querySnapshot = await getDocs(vocabQuery);
+        console.log("Vocabulary Snapshot:", querySnapshot.docs.length, "items found for lesson", lessonId, "in language", languageId);
         const vocabData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setVocabulary(vocabData);
 
@@ -42,7 +45,11 @@ const VocabularyList = ({ lessonId, languageId }) => {
 
       } catch (err) {
         console.error("Error fetching vocabulary:", err);
-        setError("Failed to load vocabulary. " + err.message);
+        if (err.message.includes("ERR_NETWORK_CHANGED") || err.code === "unavailable") {
+          setError("Network connection issue. Please check your internet and try again.");
+        } else {
+          setError("Failed to load vocabulary. " + err.message);
+        }
       }
       setLoading(false);
     };

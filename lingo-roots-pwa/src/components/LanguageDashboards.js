@@ -31,7 +31,7 @@ const LanguageDashboard = ({ languageId = "Duala" }) => {
 
         // Fetch lessons for the given language
         const lessonsQuery = query(
-          collection(db, "lessonsPath"),
+          collection(db, lessonsPath),
           //where("languageId", "==", languageId),
           where("published", "==", true), // Only fetch published lessons
           orderBy("order") // Order lessons by the 'order' field
