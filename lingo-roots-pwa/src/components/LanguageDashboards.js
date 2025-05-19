@@ -3,7 +3,7 @@ import { db } from '../firebase'; // Import Firestore instance
 import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import LessonList from './LessonList'; // We'll create this next
 
-const LanguageDashboard = ({ languageId = "Duala" }) => { // Defaulting to ghomala for MVP
+const LanguageDashboard = ({ languageId = "Duala" }) => {
   const [language, setLanguage] = useState(null);
   const [lessons, setLessons] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,15 +26,19 @@ const LanguageDashboard = ({ languageId = "Duala" }) => { // Defaulting to ghoma
         //   return;
         // }
 
+        //Fetch lessons for the given language from its subcollection
+        const lessonsPath = `languages/${languageId}/lessons`;
+
         // Fetch lessons for the given language
         const lessonsQuery = query(
-          collection(db, "lessons"),
-          where("languageId", "==", languageId),
+          collection(db, "lessonsPath"),
+          //where("languageId", "==", languageId),
           where("published", "==", true), // Only fetch published lessons
           orderBy("order") // Order lessons by the 'order' field
         );
 
         const querySnapshot = await getDocs(lessonsQuery);
+        console.log("Query Snapshot:", querySnapshot.docs.length, "lessons found for", languageId)//for debugging
         const lessonsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setLessons(lessonsData);
 
