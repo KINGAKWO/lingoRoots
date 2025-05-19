@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import VocabularyList from './VocabularyList'; // We'll create this next
 import Quiz from './Quiz'; // Import the Quiz component
 
-const LessonList = ({ lessons }) => {
+const LessonList = ({ lessons , userId }) => {
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [showQuiz, setShowQuiz] = useState(false); // State to toggle quiz visibility
   const [quizResult, setQuizResult] = useState(null); // State to store quiz result
@@ -56,6 +56,7 @@ const LessonList = ({ lessons }) => {
               <Quiz 
                 lessonId={selectedLesson.id} 
                 languageId={selectedLesson.languageId}
+                userId={userId}
                 onQuizComplete={handleQuizComplete} 
               />
             )}

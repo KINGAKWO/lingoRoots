@@ -44,7 +44,7 @@ function App() {
             <p>Welcome, {currentUser.email}!</p>
             <button onClick={handleSignOut}>Sign Out</button>
             <hr />
-            <LanguageDashboard />
+            <LanguageDashboard userId={currentUser.uid}/>
           </div>
         ) : (
           <div>

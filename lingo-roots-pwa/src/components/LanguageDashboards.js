@@ -3,7 +3,7 @@ import { db } from '../firebase'; // Import Firestore instance
 import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import LessonList from './LessonList'; // We'll create this next
 
-const LanguageDashboard = ({ languageId = "Duala" }) => {
+const LanguageDashboard = ({ languageId = "Duala", userId}) => {
   const [language, setLanguage] = useState(null);
   const [lessons, setLessons] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -62,7 +62,7 @@ const LanguageDashboard = ({ languageId = "Duala" }) => {
     <div>
       {/* <h2>{language.name} Lessons</h2>  Uncomment if fetching language doc and want to display name */}
       <h2>Lessons</h2>
-      <LessonList lessons={lessons} />
+      <LessonList lessons={lessons} userId={userId}/>
     </div>
   );
 };

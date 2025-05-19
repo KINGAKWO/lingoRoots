@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
-import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
+import { collection, query, where, getDocs, orderBy, doc, setDoc, getDoc, serverTimestamp, increment } from "firebase/firestore";
 
-const Quiz = ({ lessonId, languageId, onQuizComplete }) => {
+const Quiz = ({ lessonId, languageId, userId, onQuizComplete }) => {
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
@@ -66,7 +66,43 @@ const Quiz = ({ lessonId, languageId, onQuizComplete }) => {
     setShowFeedback(true);
   };
 
-  const handleNextQuestion = () => {
+  const saveQuizResult = async (finalScore, totalQuestions) => { // Renamed userProgressRef for clarity
+    if (!userId || !lessonId) {
+      console.error("User ID or Lesson ID is missing, cannot save quiz result.");
+      return;
+    }
+    const userProgressDocRef = doc(db, "userProgress", userId); // Use a more descriptive name
+    // const lessonScorePath =  `lessonScores.${lessonId}`; // This variable is not directly used in setDoc like this for nested maps
+    try {
+        const userProgressSnap = await getDoc(userProgressDocRef);
+        let existingHighScore = 0;
+        // Ensure you are checking the path correctly for nested map
+        if (userProgressSnap.exists() && userProgressSnap.data().lessonScores && userProgressSnap.data().lessonScores[lessonId]) {
+          existingHighScore = userProgressSnap.data().lessonScores[lessonId].highScore || 0;
+        }
+        const newHighScore = Math.max(existingHighScore, finalScore);
+
+        // Correctly structure the update for a nested map field with merge:true
+        await setDoc(userProgressDocRef, {
+          lessonScores: {
+            [lessonId]: { // Dynamic key for the lesson ID
+              lastScore: finalScore,
+              highScore: newHighScore,
+              totalQuestions: totalQuestions, // Make sure this matches your Firestore structure if you want it
+              attempts: increment(1), 
+              lastAttemptedOn: serverTimestamp() 
+              // If your Firestore structure uses 'completed: boolean', add it here:
+              // completed: newHighScore >= (totalQuestions * 0.8) // Example completion logic
+            }
+          }
+        }, { merge: true }); 
+        console.log("Quiz result saved for lesson:", lessonId, "for user:", userId);
+    } catch (error) {
+      console.error("Error saving quiz result: ", error);
+    }
+  };
+
+  const handleNextQuestion = async() => {
     setSelectedAnswer(null);
     setShowFeedback(false);
     setFeedbackMessage('');
@@ -74,12 +110,15 @@ const Quiz = ({ lessonId, languageId, onQuizComplete }) => {
       setCurrentQuestionIndex(prevIndex => prevIndex + 1);
     } else {
       // Quiz finished
+      // Pass finalScore (which is 'score' state) and totalQuestions (which is 'questions.length')
+      await saveQuizResult(score, questions.length); 
       if (onQuizComplete) {
         onQuizComplete(score, questions.length);
       }
     }
   };
-
+// ... existing code ...
+  // The main return logic for the Quiz component starts here
   if (loading) return <p>Loading quiz...</p>;
   if (error) return <p style={{ color: 'red' }}>Error: {error}</p>;
   if (questions.length === 0) return <p>No quiz questions available for this lesson yet.</p>;
@@ -120,6 +159,6 @@ const Quiz = ({ lessonId, languageId, onQuizComplete }) => {
       <p>Score: {score} / {questions.length}</p>
     </div>
   );
-};
+}; // This is the correct closing brace for the Quiz component
 
 export default Quiz;
