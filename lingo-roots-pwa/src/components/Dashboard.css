@@ -1,0 +1,200 @@
+.dashboard-container {
+  padding: 20px;
+  font-family: 'Arial', 'Helvetica Neue', Helvetica, sans-serif; /* Placeholder font, ensure chosen font supports diverse alphabets */
+  background-color: #f4f4f4; /* Light background for the page */
+  min-height: 100vh;
+  color: #333333; /* Default dark text color */
+}
+
+.dashboard-header {
+  text-align: center;
+  padding: 20px;
+  margin-bottom: 30px;
+  background-color: #007A5E; /* Green from Cameroon flag */
+  color: #FFFFFF; /* Light text for header */
+  border-radius: 8px;
+}
+
+.dashboard-header h1 {
+  margin: 0;
+  font-size: 2.5em;
+  font-family: 'Verdana', 'Geneva', sans-serif; /* Example of a different font for heading */
+}
+
+.dashboard-header p {
+  font-size: 1.1em;
+  margin-top: 5px;
+}
+
+.dashboard-section {
+  background-color: #FFFFFF; /* White background for sections */
+  padding: 25px;
+  margin: 20px 0;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dashboard-section:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.dashboard-section h2, .dashboard-section h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  font-family: 'Georgia', serif; /* Example of a different font for section titles */
+}
+
+/* Section-specific border colors */
+.continue-learning-section {
+  border-left: 7px solid #007A5E; /* Green */
+}
+.continue-learning-section h2 {
+  color: #007A5E;
+  border-bottom: 2px solid #FCD116; /* Yellow accent */
+}
+
+.daily-quiz-section {
+  border-left: 7px solid #CE1126; /* Red */
+}
+.daily-quiz-section h2 {
+  color: #CE1126;
+  border-bottom: 2px solid #007A5E; /* Green accent */
+}
+
+.gamification-elements-section {
+  border-left: 7px solid #FCD116; /* Yellow */
+}
+.gamification-elements-section h2 {
+  color: #FCD116;
+  border-bottom: 2px solid #CE1126; /* Red accent */
+}
+
+.cultural-corner-section {
+  border-left: 7px solid #333333; /* Dark accent for variety */
+}
+.cultural-corner-section h2 {
+  color: #333333;
+  border-bottom: 2px solid #007A5E; /* Green accent */
+}
+
+
+.dashboard-button {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 25px; /* More rounded buttons */
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: bold;
+  text-decoration: none;
+  display: inline-block;
+  margin: 10px 5px 0 0;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  text-align: center;
+}
+
+.dashboard-button:hover {
+  transform: translateY(-2px);
+}
+
+.button-green {
+  background-color: #007A5E; /* Green */
+  color: #FFFFFF;
+}
+.button-green:hover {
+  background-color: #005c46; /* Darker green */
+}
+
+.button-red {
+  background-color: #CE1126; /* Red */
+  color: #FFFFFF;
+}
+.button-red:hover {
+  background-color: #a00c1e; /* Darker red */
+}
+
+.button-yellow {
+  background-color: #FCD116; /* Yellow */
+  color: #333333; /* Dark text on yellow for readability */
+}
+.button-yellow:hover {
+  background-color: #eab600; /* Darker yellow */
+}
+
+.progress-bar-container {
+  width: 100%;
+  background-color: #e0e0e0; /* Light grey for progress bar background */
+  border-radius: 25px;
+  margin: 15px 0;
+  overflow: hidden; /* Ensures inner bar respects border radius */
+}
+
+.progress-bar {
+  height: 25px;
+  background-color: #FCD116; /* Yellow for progress */
+  border-radius: 25px;
+  text-align: center;
+  line-height: 25px;
+  color: #333333; /* Dark text on progress bar */
+  font-weight: bold;
+  transition: width 0.5s ease-in-out;
+}
+
+.gamification-grid {
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.gamification-item {
+  padding: 15px;
+  border-radius: 8px;
+  min-width: 100px;
+}
+
+.gamification-item h3 {
+  margin-top: 0;
+  font-size: 1.2em;
+  margin-bottom: 5px;
+}
+
+.gamification-item p {
+  font-size: 1.8em;
+  font-weight: bold;
+  margin: 0;
+}
+
+.streak-item h3 { color: #CE1126; } /* Red for streak */
+.points-item h3 { color: #007A5E; } /* Green for points */
+.badges-item h3 { color: #FCD116; } /* Yellow for badges */
+
+.dashboard-footer {
+  margin-top: 40px;
+  padding-top: 20px;
+  text-align: center;
+  color: #555555;
+  border-top: 1px solid #cccccc;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .dashboard-header h1 {
+    font-size: 2em;
+  }
+  .dashboard-section {
+    padding: 20px;
+  }
+  .gamification-grid {
+    flex-direction: column;
+  }
+  .gamification-item {
+    margin-bottom: 15px;
+  }
+  .dashboard-button {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+}
