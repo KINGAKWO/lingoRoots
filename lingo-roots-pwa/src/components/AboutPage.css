@@ -1,0 +1,83 @@
+.about-page-container {
+  padding: 20px;
+  max-width: 900px;
+  margin: 40px auto;
+  font-family: Arial, sans-serif;
+  color: #333;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.about-header {
+  text-align: center;
+  margin-bottom: 40px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.about-header h1 {
+  font-size: 2.5em;
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+.about-header p {
+  font-size: 1.1em;
+  color: #555;
+}
+
+.mission-section,
+.vision-section,
+.team-section,
+.contact-info {
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 6px;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+}
+
+.mission-section h2,
+.vision-section h2,
+.team-section h2,
+.contact-info h2 {
+  font-size: 1.8em;
+  color: #34495e;
+  margin-bottom: 15px;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 5px;
+  display: inline-block; /* To make border only as long as text */
+}
+
+.mission-section p,
+.vision-section p,
+.team-section p,
+.contact-info p {
+  font-size: 1em;
+  line-height: 1.6;
+  color: #444;
+}
+
+.contact-info a {
+  color: #3498db;
+  text-decoration: none;
+}
+
+.contact-info a:hover {
+  text-decoration: underline;
+}
+
+.team-section em {
+  font-style: italic;
+  color: #777;
+}
+
+.about-footer {
+  text-align: center;
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+  font-size: 0.9em;
+  color: #777;
+}

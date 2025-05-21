@@ -4,7 +4,7 @@ import './LandingPage.css';
 import { db } from '../../firebase'; // Import Firestore instance
 import { collection, getDocs, query } from 'firebase/firestore'; // Import Firestore functions
 // Placeholder icons - replace with actual SVGs or a library like react-icons
-import { FaGlobeAfrica, FaUserGraduate, FaLaptopCode, FaHeadphonesAlt, FaComments, FaLanguage, FaChalkboardTeacher } from 'react-icons/fa'; 
+import { FaGlobeAfrica, FaUserGraduate, FaLaptopCode, FaHeadphonesAlt, FaComments, FaLanguage, FaChalkboardTeacher, FaBars, FaTimes } from 'react-icons/fa'; // Added FaBars and FaTimes 
 
 // Hardcoded languagesData removed as it will be fetched from Firestore
 
@@ -36,6 +36,7 @@ const LandingPage = () => {
   const [fetchedLanguagesData, setFetchedLanguagesData] = useState([]);
   const [loadingLanguages, setLoadingLanguages] = useState(true);
   const [errorLanguages, setErrorLanguages] = useState(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const fetchLanguages = async () => {
@@ -68,9 +69,15 @@ const LandingPage = () => {
       {/* Navigation Bar */}
       <nav className="navbar">
         <div className="navbar-logo">
-          <Link to="/">LingoRoots</Link>
+          <Link to="/">
+            <img src="/logo.jpg" alt="LingoRoots Logo" className="navbar-logo-img" />
+            LingoRoots
+          </Link>
         </div>
-        <div className="navbar-links">
+        <div className="mobile-menu-icon-landing" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+          {isMobileMenuOpen ? <FaTimes /> : <FaBars />}
+        </div>
+        <div className={`navbar-links ${isMobileMenuOpen ? 'mobile-active' : ''}`}>
           <Link to="/">Home</Link>
           {/* Links to Dashboard, Languages, About removed for non-authenticated users */}
           {/* <Link to="/about">About</Link> */}
@@ -85,8 +92,20 @@ const LandingPage = () => {
           <h1>Discover Your Roots Through Language</h1>
           <p>Learn your mother tongue with personalized lessons tailored to your learning style and pace.</p>
           <div className="hero-buttons">
-            <Link to="/signup" className="btn btn-start-learning">Start Learning</Link>
-            <Link to="/about" className="btn btn-learn-more">Learn More</Link>
+            <Link to="/signup" className="btn btn-start-learning cta">
+              <span>Start Learning</span>
+              <svg width="15px" height="10px" viewBox="0 0 13 10">
+                <path d="M1,5 L11,5"></path>
+                <polyline points="8 1 12 5 8 9"></polyline>
+              </svg>
+            </Link>
+            <button onClick={() => document.getElementById('discover-languages').scrollIntoView({ behavior: 'smooth' })} className="btn btn-learn-more cta">
+              <span>Learn More</span>
+              <svg width="15px" height="10px" viewBox="0 0 13 10">
+                <path d="M1,5 L11,5"></path>
+                <polyline points="8 1 12 5 8 9"></polyline>
+              </svg>
+            </button>
           </div>
         </div>
         <div className="hero-image-placeholder-new">
@@ -100,7 +119,7 @@ const LandingPage = () => {
 
       {/* Discover Our Languages Section */}
       {/* Discover Our Languages Section */}
-      <section className="discover-languages-section-new">
+      <section id="discover-languages" className="discover-languages-section-new">
         <h2>Discover Our Languages</h2>
         <p>Explore and connect with your cultural heritage through these rich languages.</p>
         <div className="language-cards-container-new">

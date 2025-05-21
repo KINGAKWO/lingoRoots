@@ -2,16 +2,19 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import { auth } from './firebase'; // Import auth from your firebase.js
 import { onAuthStateChanged, signOut } from "firebase/auth";
+import { FaBars, FaTimes } from 'react-icons/fa'; // Import hamburger and close icons
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import SignUp from './components/SignUp';
 import SignIn from './components/SignIn';
 import LanguageDashboard from './components/LanguageDashboards';
 import Dashboard from './components/Dashboard'; // Import Dashboard component
 import LandingPage from './components/LandingPage/LandingPage'; // Import LandingPage component
+import AboutPage from './components/AboutPage'; // Import AboutPage component
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true); // To handle initial auth state check
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -42,12 +45,17 @@ function App() {
     <Router>
       <div className="App">
         <header className="App-header">
-          <Link to={currentUser ? "/dashboard" : "/"}> {/* Removed inline style */}
+          <Link to={currentUser ? "/dashboard" : "/"} className="app-logo-link"> {/* Added class for specific styling if needed */}
             <h1>LingoRoots</h1>
           </Link>
           {currentUser && (
-            <nav className="main-navigation"> {/* Changed class, removed inline style */}
-              <Link to="/dashboard" className="nav-link">Home</Link>
+            <div className="mobile-menu-icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+              {isMobileMenuOpen ? <FaTimes /> : <FaBars />}
+            </div>
+          )}
+          {currentUser && (
+            <nav className={`main-navigation ${isMobileMenuOpen ? 'mobile-active' : ''}`}> {/* Changed class, removed inline style */}
+              <Link to="/" className="nav-link">Home</Link> {/* Corrected Home link to point to / */}
               <Link to="/dashboard" className="nav-link">Dashboard</Link>
               <Link to="/lessons" className="nav-link">Languages</Link>
               <Link to="/about" className="nav-link">About</Link> {/* Added About link, assumes /about route will be handled */}
@@ -57,6 +65,7 @@ function App() {
                 Sign Out
               </button>
               {/* <p className="user-email-display">Logged in as: {currentUser.email}</p> */}
+              {/* Ensure mobile menu closes on link click if desired by adding onClick={() => setIsMobileMenuOpen(false)} to each Link */}
             </nav>
           )}
         </header>
@@ -67,6 +76,7 @@ function App() {
               <>
                 <Route path="/dashboard" element={<Dashboard userId={currentUser.uid} />} />
                 <Route path="/lessons" element={<LanguageDashboard userId={currentUser.uid} />} />
+                <Route path="/about" element={<AboutPage />} /> {/* Added route for AboutPage */}
                 {/* Add routes for Quiz, Culture pages here */}
                 {/* Default route for logged-in users */}
                 <Route path="/*" element={<Navigate to="/dashboard" replace />} />

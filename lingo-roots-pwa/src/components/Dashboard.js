@@ -135,7 +135,7 @@ const Dashboard = ({ userId }) => {
   return (
     <div className="dashboard-page-container"> {/* Updated class name for consistency */}
       <div className="dashboard-header-greeting">
-        <h2>Welcome back, {userName}</h2>
+        <h2>Welcome back, {userData.firstName || 'User'}</h2>
         <p>Track your progress and continue your language learning journey.</p>
       </div>
 

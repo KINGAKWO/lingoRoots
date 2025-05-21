@@ -101,8 +101,58 @@
   border-color: #d43f3a;
 }
 
+/* Mobile Menu Icon */
+.mobile-menu-icon {
+  display: none; /* Hidden by default */
+  font-size: 1.5em;
+  cursor: pointer;
+  z-index: 1001; /* Ensure it's above other content */
+}
+
 .user-email-display {
   font-size: 0.8em;
   color: #555555;
   margin-left: 15px; /* Space it from the sign out button if it were visible */
+}
+
+/* Responsive adjustments for main navigation */
+@media (max-width: 768px) {
+  .main-navigation {
+    display: none; /* Hide desktop nav on small screens */
+    flex-direction: column;
+    position: absolute;
+    top: 60px; /* Adjust based on header height */
+    left: 0;
+    width: 100%;
+    background-color: #ffffff; /* Match header background */
+    border-top: 1px solid #eeeeee;
+    padding: 10px 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    z-index: 1000;
+  }
+
+  .main-navigation.mobile-active {
+    display: flex; /* Show when mobile menu is active */
+  }
+
+  .main-navigation .nav-link,
+  .main-navigation .signout-btn {
+    width: 100%;
+    text-align: left;
+    padding: 10px 20px;
+    border-bottom: 1px solid #f0f0f0; /* Separator for links */
+  }
+
+  .main-navigation .nav-link:last-child,
+  .main-navigation .signout-btn {
+    border-bottom: none;
+  }
+
+  .mobile-menu-icon {
+    display: block; /* Show hamburger icon on small screens */
+  }
+
+  .App-header h1 {
+    font-size: 1.5em; /* Slightly smaller logo on mobile */
+  }
 }
