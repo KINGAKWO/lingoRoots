@@ -1,0 +1,79 @@
+.quiz-container {
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); Removed to match image more closely */
+}
+
+.quiz-title {
+  font-size: 1.5em;
+  color: #333;
+  margin-bottom: 20px;
+  text-align: left; /* As per image */
+}
+
+.quiz-question-block {
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  /* border-bottom: 1px solid #eee; Removed to match image */
+}
+
+.quiz-question-block:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.quiz-question-text {
+  font-size: 1.1em;
+  color: #333;
+  margin-bottom: 15px;
+  font-weight: 500; /* Slightly bolder than normal text */
+  line-height: 1.4;
+}
+
+.quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Space between radio options */
+}
+
+.quiz-option-label {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background-color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.quiz-option-label:hover {
+  background-color: #f0f0f0;
+}
+
+.quiz-option-radio {
+  margin-right: 10px;
+  width: 18px; /* Custom size for radio button */
+  height: 18px;
+  accent-color: #007bff; /* Color for the checked radio button */
+}
+
+.quiz-option-text {
+  font-size: 1em;
+  color: #555;
+}
+
+/* Styling for when a radio button is checked (optional, can be handled by browser default or more specific CSS if needed) */
+.quiz-option-label input[type="radio"]:checked + .quiz-option-text {
+  font-weight: bold; /* Example: make text bold when selected */
+  color: #0056b3;
+}
+
+.quiz-status {
+  padding: 20px;
+  text-align: center;
+  color: #777;
+  font-style: italic;
+}

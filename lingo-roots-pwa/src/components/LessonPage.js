@@ -14,6 +14,7 @@ const LessonPage = ({ userId }) => {
 
   const [lesson, setLesson] = useState(null);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [quizUserAnswers, setQuizUserAnswers] = useState({}); // Added for quiz answers
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -57,19 +58,35 @@ const LessonPage = ({ userId }) => {
   }, [languageId, lessonId]);
 
   const handleNextStep = () => {
+    const currentStep = lesson.steps[currentStepIndex];
+    if (currentStep.type === 'quiz' || currentStep.type === 'practice') {
+      // Process quiz answers here (e.g., save to Firestore, calculate score)
+      console.log('Quiz answers for step:', currentStep.title, quizUserAnswers);
+      // For now, just log. Backend integration will handle saving.
+      // Optionally, reset answers if each quiz step is independent
+      // setQuizUserAnswers({}); 
+    }
+
     if (lesson && currentStepIndex < lesson.steps.length - 1) {
       setCurrentStepIndex(currentStepIndex + 1);
+      // If the next step is a new quiz, reset answers. 
+      // This assumes quizzes don't span multiple visual steps with persistent answers.
+      if (lesson.steps[currentStepIndex + 1]?.type === 'quiz' || lesson.steps[currentStepIndex + 1]?.type === 'practice') {
+        setQuizUserAnswers({});
+      }
     } else if (lesson && currentStepIndex === lesson.steps.length - 1) {
-      // Mark lesson as complete or navigate away
-      // For now, navigate back to the language dashboard or a specific completion page
       alert('Lesson completed! Redirecting...'); // Placeholder
-      navigate(`/languages/${languageId}`); // Example: navigate back to language dashboard
+      navigate(`/lessons`); // Navigate to the main languages/lessons overview page
     }
   };
 
   const handlePreviousStep = () => {
     if (currentStepIndex > 0) {
       setCurrentStepIndex(currentStepIndex - 1);
+      // If moving back to a quiz, answers might need to be re-evaluated or kept.
+      // For simplicity, current answers are preserved if user navigates back and forth within a quiz step.
+      // If moving to a *different* previous step that was a quiz, answers for *that* quiz are not re-loaded by this.
+      // This assumes quizUserAnswers is for the *current* quiz step.
     }
   };
 
@@ -77,6 +94,10 @@ const LessonPage = ({ userId }) => {
   if (error) return <div className="lesson-page-status error"><p>Error: {error}</p></div>;
   if (!lesson) return <div className="lesson-page-status"><p>Lesson data could not be loaded or is empty.</p></div>;
 
+  // Ensure currentStep exists before trying to access its properties
+  if (!lesson.steps || currentStepIndex >= lesson.steps.length) {
+    return <div className="lesson-page-status"><p>Lesson step not found.</p></div>;
+  }
   const currentStep = lesson.steps[currentStepIndex];
   const totalSteps = lesson.steps.length;
   const progressPercentage = totalSteps > 0 ? ((currentStepIndex + 1) / totalSteps) * 100 : 0;
@@ -99,15 +120,22 @@ const LessonPage = ({ userId }) => {
         return <VocabularyList words={currentStep.words || []} languageId={languageId} />;
       case 'quiz':
       case 'practice': // Assuming 'practice' might also use the Quiz component or similar structure
+        // Ensure currentStep.questions is an array; provide empty array if not to prevent Quiz component error
+        const questions = Array.isArray(currentStep.questions) ? currentStep.questions : [];
+        if (questions.length === 0 && currentStep.type === 'quiz') {
+            console.warn("Quiz step has no questions defined in lesson data for step title:", currentStep.title);
+            // return <p className="step-content-status">Quiz questions are not available for this step.</p>;
+        }
         return (
-          <Quiz 
-            lessonId={lesson.id} // Or currentStep.quizId if specific to step
-            languageId={languageId} 
-            userId={userId} 
-            onQuizComplete={(score, numQuestions) => {
-              console.log(`Quiz completed for step! Score: ${score}/${numQuestions}`);
-              // Decide if quiz completion automatically moves to next step or shows summary
-              // For now, user clicks Next manually after quiz.
+          <Quiz
+            title={currentStep.title || 'Practice Session'} // Use step title for the quiz title
+            questions={questions} 
+            userAnswers={quizUserAnswers}
+            onAnswerSelect={(questionId, answer) => {
+              setQuizUserAnswers(prevAnswers => ({
+                ...prevAnswers,
+                [questionId]: answer,
+              }));
             }}
           />
         );

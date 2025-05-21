@@ -29,10 +29,29 @@ const VocabularyList = ({ words, languageId }) => { // Changed props: lessonId r
             // For simplicity, let's assume item.audio is the path that firebaseStorage.ref can use directly
             // or it's a full gs:// URL. If it's a relative path within the language folder, adjust accordingly.
             // Example: const audioPath = item.audio.startsWith('gs://') ? item.audio : `languages/${languageId}/${item.audio}`;
-            const audioRef = ref(firebaseStorage, item.audio); // Use item.audio directly if it's a full path
+            // const audioRef = ref(firebaseStorage, item.audio); // Old line
+            // urls[item.id] = await getDownloadURL(audioRef); // Old line
+
+            let audioPath;
+            if (item.audio.startsWith('gs://')) {
+              audioPath = item.audio; // Already a full gs:// URL
+            } else if (item.audio.includes('/')) {
+              // Path includes slashes, could be full path from bucket root or relative needing language prefix
+              if (item.audio.startsWith('languages/')) {
+                audioPath = item.audio; // Full path from bucket root like 'languages/duala/audio/file.mp3'
+              } else {
+                // Relative path like 'audio/file.mp3', prepend language folder
+                audioPath = `languages/${languageId}/${item.audio}`; // Results in 'languages/duala/audio/file.mp3'
+              }
+            } else {
+              // Simple filename like 'file.mp3', construct full path assuming 'audio' subfolder
+              audioPath = `languages/${languageId}/audio/${item.audio}`; // Results in 'languages/duala/audio/file.mp3'
+            }
+
+            const audioRef = ref(firebaseStorage, audioPath);
             urls[item.id] = await getDownloadURL(audioRef);
           } catch (audioError) {
-            console.warn(`Could not get audio URL for item ID ${item.id} (path: ${item.audio}):`, audioError);
+            console.warn(`Could not get audio URL for item ID ${item.id} (original value: ${item.audio}, attempted path: ${audioPath}):`, audioError);
             urls[item.id] = null; // Mark as failed to load
           }
         }
