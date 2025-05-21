@@ -61,7 +61,7 @@ const LanguageDashboard = ({ languageId = "Duala", userId}) => {
     <div>
       {/* <h2>{language.name} Lessons</h2>  Uncomment if fetching language doc and want to display name */}
       <h2>Lessons</h2>
-      <LessonList lessons={lessons} userId={userId}/>
+      <LessonList lessons={lessons} userId={userId} languageId={languageId} />
     </div>
   );
 };

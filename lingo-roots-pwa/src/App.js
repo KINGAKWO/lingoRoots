@@ -10,6 +10,7 @@ import LanguageDashboard from './components/LanguageDashboards';
 import Dashboard from './components/Dashboard'; // Import Dashboard component
 import LandingPage from './components/LandingPage/LandingPage'; // Import LandingPage component
 import AboutPage from './components/AboutPage'; // Import AboutPage component
+import LessonPage from './components/LessonPage'; // Import LessonPage component
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -76,6 +77,7 @@ function App() {
               <>
                 <Route path="/dashboard" element={<Dashboard userId={currentUser.uid} />} />
                 <Route path="/lessons" element={<LanguageDashboard userId={currentUser.uid} />} />
+                <Route path="/lessons/:languageId/:lessonId" element={<LessonPage userId={currentUser.uid} />} /> {/* Route for individual lessons, passing userId */}
                 <Route path="/about" element={<AboutPage />} /> {/* Added route for AboutPage */}
                 {/* Add routes for Quiz, Culture pages here */}
                 {/* Default route for logged-in users */}

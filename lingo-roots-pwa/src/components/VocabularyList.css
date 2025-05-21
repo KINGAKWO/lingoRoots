@@ -1,0 +1,105 @@
+.vocabulary-grid-container {
+  width: 100%;
+  /* The title 'Key Vocabulary' is expected to be rendered by LessonPage.js */
+}
+
+.vocabulary-grid {
+  display: grid;
+  /* Adjust minmax for card width based on image. Looks like 2 cards per row on wider screens. */
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+  gap: 20px; 
+  padding-top: 5px; /* Small space if title is directly above */
+}
+
+.vocabulary-card {
+  background-color: #ffffff; 
+  border: 1px solid #e9ecef; /* Lighter border */
+  border-radius: 8px; 
+  padding: 18px 20px; /* Slightly adjusted padding */
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03), 0 2px 5px rgba(0,0,0,0.06); /* Softer shadow */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; 
+  min-height: 130px; /* Ensure cards have a decent, consistent height */
+}
+
+.vocabulary-term-local {
+  font-size: 1.2em; /* Example: Mbote */
+  font-weight: 600; /* Bold as in image */
+  color: #212529; /* Dark text */
+  margin-bottom: 4px;
+}
+
+.vocabulary-term-translation {
+  font-size: 0.9em; /* Example: Hello */
+  color: #6c757d; /* Grey text */
+  margin-bottom: 16px; 
+  flex-grow: 1; 
+}
+
+.listen-button {
+  background-color: #fff; /* White background for button */
+  border: 1px solid #ced4da; /* Grey border, matching image */
+  color: #495057; /* Dark grey text */
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875em; /* 14px */
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center; 
+  gap: 6px; /* Space for icon */
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+  align-self: stretch; /* Make button take full width of its container */
+  text-align: center;
+}
+
+.listen-button:hover {
+  background-color: #f8f9fa; /* Very light grey on hover */
+  border-color: #adb5bd;
+}
+
+.listen-button span[role="img"] {
+  font-size: 1.1em; /* Adjust icon size if using emoji/text icon */
+  line-height: 1; /* Ensure icon aligns well */
+}
+
+.vocabulary-status,
+.audio-status-error {
+  font-style: italic;
+  color: #6c757d;
+  text-align: center;
+  padding: 20px 0;
+  width: 100%;
+}
+
+.audio-status-error {
+  font-size: 0.8em;
+  color: #dc3545; /* Bootstrap danger red */
+  margin-top: 8px;
+  display: block; /* Ensure it takes its own line if needed */
+  text-align: left; /* Or center, depending on placement within card */
+}
+
+/* Responsive adjustments for vocabulary grid */
+@media (max-width: 640px) { /* Adjusted breakpoint */
+  .vocabulary-grid {
+    grid-template-columns: 1fr; /* Single column on smaller screens */
+    gap: 15px;
+  }
+  .vocabulary-card {
+    padding: 15px;
+    min-height: 120px;
+  }
+  .vocabulary-term-local {
+    font-size: 1.1em;
+  }
+  .vocabulary-term-translation {
+    font-size: 0.85em;
+  }
+  .listen-button {
+    padding: 7px 10px;
+    font-size: 0.85em;
+  }
+}

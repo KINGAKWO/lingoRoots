@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import VocabularyList from './VocabularyList'; 
-import Quiz from './Quiz'; 
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
+// VocabularyList and Quiz are now part of LessonPage
+// import VocabularyList from './VocabularyList'; 
+// import Quiz from './Quiz'; 
 import { db } from '../firebase'; 
 import { doc, getDoc } from "firebase/firestore"; 
 
 
-const LessonList = ({ lessons , userId }) => {
-  const [selectedLesson, setSelectedLesson] = useState(null);
-  const [showQuiz, setShowQuiz] = useState(false); 
-  const [quizResult, setQuizResult] = useState(null); 
+const LessonList = ({ lessons , userId, languageId }) => { // Added languageId prop
+  const navigate = useNavigate(); // Initialize useNavigate
+  // selectedLesson, showQuiz, quizResult are no longer needed here as LessonPage handles this
+  // const [selectedLesson, setSelectedLesson] = useState(null);
+  // const [showQuiz, setShowQuiz] = useState(false); 
+  // const [quizResult, setQuizResult] = useState(null); 
   const [userProgress, setUserProgress] = useState(null); 
   const [loadingProgress, setLoadingProgress] = useState(false); 
 
@@ -44,22 +48,16 @@ const LessonList = ({ lessons , userId }) => {
   }
 
   const handleLessonClick = (lesson) => {
-    setSelectedLesson(lesson);
-    setShowQuiz(false); 
-    setQuizResult(null); 
+    // Navigate to the LessonPage with language and lesson ID
+    // Ensure 'languageId' prop is passed to LessonList from its parent (LanguageDashboard.js likely)
+    if (languageId && lesson.id) {
+      navigate(`/lessons/${languageId}/${lesson.id}`);
+    } else {
+      console.error('Language ID or Lesson ID is missing for navigation.');
+      // Optionally, show a toast or alert to the user
+    }
   };
-  const handleStartQuiz = () => {
-    setShowQuiz(true);
-    setQuizResult(null); 
-  };
-
-  const handleQuizComplete = (finalScore, totalQuestions) => {
-    setQuizResult({ score: finalScore, total: totalQuestions });
-    setShowQuiz(false); 
-    // Optionally, re-fetch user progress here to update the list immediately
-    // if you want to see the score update without a page refresh or userId change.
-    // For now, it will update when userId changes or on next mount.
-  };
+  // handleStartQuiz and handleQuizComplete are no longer needed here
   
   return (
     <div>
@@ -84,38 +82,9 @@ const LessonList = ({ lessons , userId }) => {
           );
         })}
       </ul>
-      <hr />
-      
-      {selectedLesson && !showQuiz && !quizResult && (
-        <div>
-          <h4>Selected Lesson: {selectedLesson.title}</h4>
-          <p>{selectedLesson.content}</p>
-          {selectedLesson.type === 'vocabulary' && (
-            <VocabularyList lessonId={selectedLesson.id} languageId={selectedLesson.languageId} />
-          )}
-          {/* Add more conditions here for other lesson types like grammar, quizzes etc. */}
-          <button onClick={handleStartQuiz} style={{ marginTop: '10px', marginBottom: '10px' }}>
-            Start Quiz for this Lesson
-          </button>
-        </div>
-      )}
-
-      {selectedLesson && showQuiz && (
-        <Quiz 
-          lessonId={selectedLesson.id} 
-          languageId={selectedLesson.languageId}
-          userId={userId}
-          onQuizComplete={handleQuizComplete} 
-        />
-      )}
-
-      {quizResult && (
-        <div>
-          <h4>Quiz Finished!</h4>
-          <p>Your score: {quizResult.score} out of {quizResult.total}</p>
-          <button onClick={() => { setSelectedLesson(null); setQuizResult(null); }}>Back to Lessons</button>
-        </div>
-      )}
+      {/* The content below (selected lesson details, quiz) is now handled by LessonPage.js */}
+      {/* <hr /> */}
+      {/* ... removed selected lesson display and quiz logic ... */}
     </div>
   );
 };

@@ -613,8 +613,8 @@ a {
 .btn-start-learning.cta span,
 .btn-start-learning.cta svg path,
 .btn-start-learning.cta svg polyline {
-  color: #FFFFFF; /* Keep text white for dark button */
-  stroke: #FFFFFF; /* Keep SVG stroke white for dark button */
+  color: #FFFFFF !important; /* Keep text white for dark button */
+  stroke: #FFFFFF !important; /* Keep SVG stroke white for dark button */
 }
 
 .btn-start-learning.cta:before {
@@ -629,8 +629,8 @@ a {
 .btn-learn-more.cta span,
 .btn-learn-more.cta svg path,
 .btn-learn-more.cta svg polyline {
-  color: #111827; /* Keep text dark for light button */
-  stroke: #111827; /* Keep SVG stroke dark for light button */
+  color: #111827 !important; /* Keep text dark for light button */
+  stroke: #111827 !important; /* Keep SVG stroke dark for light button */
 }
 
 .btn-learn-more.cta:before {

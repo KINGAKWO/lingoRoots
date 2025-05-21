@@ -3,65 +3,49 @@ import { db, storage as firebaseStorage } from '../firebase'; // Import Firestor
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { ref, getDownloadURL } from "firebase/storage";
 
-const VocabularyList = ({ lessonId, languageId }) => {
-  const [vocabulary, setVocabulary] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [audioUrls, setAudioUrls] = useState({}); // To store fetched audio URLs
+const VocabularyList = ({ words, languageId }) => { // Changed props: lessonId removed, words added
+  // State for audio URLs is still needed if we fetch them on demand or pre-fetch based on `words` prop
+  const [audioUrls, setAudioUrls] = useState({});
+  const [loadingAudio, setLoadingAudio] = useState(false); // Optional: for loading state of audio
 
+  // Effect to pre-fetch audio URLs when `words` prop changes
   useEffect(() => {
-    const fetchVocabulary = async () => {
-      if (!lessonId || !languageId) return;
-      setLoading(true);
-      setError(null);
-      setVocabulary([]);
-      setAudioUrls({});
-      try {
-        const vocabPath = `languages/${languageId}/vocabularyItems`; // Path to the subcollection
-        const vocabQuery = query(
-          collection(db, vocabPath),
-          where("lessonId", "==", lessonId)
-          // Optionally add orderBy if you have an order field for vocab items
-        );
-        const querySnapshot = await getDocs(vocabQuery);
-        console.log("Vocabulary Snapshot:", querySnapshot.docs.length, "items found for lesson", lessonId, "in language", languageId);
-        const vocabData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setVocabulary(vocabData);
-
-        // Pre-fetch audio URLs
-        const urls = {};
-        for (const item of vocabData) {
-          if (item.audioUrl) {
-            try {
-              const audioRef = ref(firebaseStorage, item.audioUrl);
-              urls[item.id] = await getDownloadURL(audioRef);
-            } catch (audioError) {
-              console.warn(`Could not get audio URL for ${item.audioUrl}:`, audioError);
-              urls[item.id] = null; // or some placeholder/error indicator
-            }
+    const preFetchAudioUrls = async () => {
+      if (!words || words.length === 0) {
+        setAudioUrls({});
+        return;
+      }
+      setLoadingAudio(true);
+      const urls = {};
+      for (const item of words) {
+        // Ensure item.id is unique and item.audioUrl exists
+        // The audioUrl in Firestore should be the full path like 'languages/duala/audio/mbote.mp3'
+        // Or, if it's just 'mbote.mp3', we might need to construct the full path here using languageId
+        if (item.id && item.audio) { // Assuming 'audio' field stores the relative path or full gs:// URL
+          try {
+            // If item.audio is a full gs:// path, ref() will handle it.
+            // If item.audio is a relative path like 'audio/mbote.mp3' and languageId is 'duala',
+            // construct path: `languages/${languageId}/${item.audio}`
+            // For simplicity, let's assume item.audio is the path that firebaseStorage.ref can use directly
+            // or it's a full gs:// URL. If it's a relative path within the language folder, adjust accordingly.
+            // Example: const audioPath = item.audio.startsWith('gs://') ? item.audio : `languages/${languageId}/${item.audio}`;
+            const audioRef = ref(firebaseStorage, item.audio); // Use item.audio directly if it's a full path
+            urls[item.id] = await getDownloadURL(audioRef);
+          } catch (audioError) {
+            console.warn(`Could not get audio URL for item ID ${item.id} (path: ${item.audio}):`, audioError);
+            urls[item.id] = null; // Mark as failed to load
           }
         }
-        setAudioUrls(urls);
-
-      } catch (err) {
-        console.error("Error fetching vocabulary:", err);
-        if (err.message.includes("ERR_NETWORK_CHANGED") || err.code === "unavailable") {
-          setError("Network connection issue. Please check your internet and try again.");
-        } else {
-          setError("Failed to load vocabulary. " + err.message);
-        }
       }
-      setLoading(false);
+      setAudioUrls(urls);
+      setLoadingAudio(false);
     };
 
-    fetchVocabulary();
-  }, [lessonId, languageId]);
+    preFetchAudioUrls();
+  }, [words, languageId]); // Rerun if words or languageId changes
 
-  if (loading) return <p>Loading vocabulary...</p>;
-  if (error) return <p style={{ color: 'red' }}>Error: {error}</p>;
-
-  if (vocabulary.length === 0) {
-    return <p>No vocabulary items found for this lesson.</p>;
+  if (!words || words.length === 0) {
+    return <p className="vocabulary-status">No vocabulary items for this step.</p>;
   }
 
   const playAudio = (audioSrc) => {
@@ -71,25 +55,33 @@ const VocabularyList = ({ lessonId, languageId }) => {
     }
   };
 
+  // Render loading state for audio if desired
+  if (loadingAudio) return <p className="vocabulary-status">Loading audio...</p>;
+
   return (
-    <div>
-      <h5>Vocabulary:</h5>
-      <ul>
-        {vocabulary.map(item => (
-          <li key={item.id}>
-            <strong>{item.termLocal}</strong>: {item.termTranslation}
-            {item.exampleSentenceLocal && <em> (e.g., "{item.exampleSentenceLocal}" - "{item.exampleSentenceTranslation}")</em>}
+    <div className="vocabulary-grid-container">
+      {/* The title "Key Vocabulary" is now part of LessonPage's step.title */}
+      {/* <h5>Vocabulary:</h5> */}
+      <div className="vocabulary-grid">
+        {words.map(item => (
+          // Each item is a card
+          <div key={item.id || item.original} className="vocabulary-card">
+            <div className="vocabulary-term-local">{item.original}</div>
+            <div className="vocabulary-term-translation">{item.translation}</div>
+            {/* Assuming item.audio is the path and audioUrls[item.id] holds the playable URL */}
             {audioUrls[item.id] && (
-              <button onClick={() => playAudio(audioUrls[item.id])} style={{ marginLeft: '10px' }}>
-                Play Audio
+              <button onClick={() => playAudio(audioUrls[item.id])} className="listen-button">
+                {/* Icon can be added here, e.g., <Volume2 size={16} /> */}
+                <span role="img" aria-label="listen">🔊</span> Listen
               </button>
             )}
-            {!audioUrls[item.id] && item.audioUrl && (
-              <span style={{ marginLeft: '10px', fontStyle: 'italic' }}>(Audio pending/error)</span>
+            {/* Show a message if audio was expected but failed to load */}
+            {item.audio && !audioUrls[item.id] && !loadingAudio && (
+              <span className="audio-status-error">(Audio not available)</span>
             )}
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 };
