@@ -1,4 +1,4 @@
-.dashboard-container {
+.dashboard-page-container {
   padding: 20px;
   font-family: 'Arial', 'Helvetica Neue', Helvetica, sans-serif; /* Placeholder font, ensure chosen font supports diverse alphabets */
   background-color: #f4f4f4; /* Light background for the page */
@@ -6,6 +6,22 @@
   color: #333333; /* Default dark text color */
 }
 
+.dashboard-header-greeting {
+  margin-bottom: 20px;
+}
+
+.dashboard-header-greeting h2 {
+  font-size: 24px; /* Matches image */
+  font-weight: bold; /* Matches image */
+  margin-bottom: 5px;
+}
+
+.dashboard-header-greeting p {
+  font-size: 16px; /* Matches image */
+  color: #555;
+}
+
+/* Original .dashboard-header can be removed or repurposed if not used by new design */
 .dashboard-header {
   text-align: center;
   padding: 20px;
@@ -179,22 +195,296 @@
   border-top: 1px solid #cccccc;
 }
 
+/* New Styles for Redesigned Dashboard */
+
+.summary-stats-cards {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: left; /* Align text to left as per image */
+  flex-grow: 1;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  display: flex; /* Use flex to align icon and text */
+  align-items: center; /* Vertically center icon and text block */
+}
+
+.stat-icon {
+  /* Assuming icons will be SVGs or font icons later */
+  /* For now, using text placeholders */
+  font-size: 20px; /* Placeholder size */
+  font-weight: bold;
+  color: #777; /* Placeholder color */
+  margin-right: 15px; /* Space between icon and text */
+  width: 40px; /* Fixed width for icon area */
+  height: 40px; /* Fixed height for icon area */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #eee; /* Example border for icon placeholder */
+  border-radius: 50%; /* Circular icon placeholder */
+}
+
+.stat-card .stat-value {
+  font-size: 28px; /* Larger font for value */
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 5px;
+  line-height: 1;
+}
+
+.stat-card .stat-label {
+  font-size: 14px;
+  color: #666;
+  line-height: 1;
+}
+
+.language-tabs {
+  margin-bottom: 30px;
+  display: flex;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.language-tab-btn {
+  padding: 10px 20px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  font-size: 16px;
+  color: #555;
+  border-bottom: 3px solid transparent; /* For active state */
+  margin-right: 10px; /* Spacing between tabs */
+  transition: color 0.3s ease, border-bottom-color 0.3s ease;
+}
+
+.language-tab-btn.active {
+  color: #007A5E; /* Active tab color */
+  font-weight: bold;
+  border-bottom-color: #007A5E; /* Active tab underline */
+}
+
+.language-tab-btn:hover {
+  color: #005c46;
+}
+
+.language-progress-details,
+.recent-activity {
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 25px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.language-progress-details h3,
+.recent-activity h3 {
+  font-size: 20px;
+  font-weight: bold;
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.language-progress-details p,
+.recent-activity p {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 15px;
+}
+
+.overall-progress-bar-container {
+  width: 100%;
+  background-color: #e9ecef;
+  border-radius: 5px;
+  height: 10px; /* Slimmer progress bar */
+  margin-bottom: 10px;
+  position: relative; /* For percentage text */
+}
+
+.overall-progress-bar {
+  height: 100%;
+  background-color: #333; /* Black progress bar as per image */
+  border-radius: 5px;
+  transition: width 0.5s ease-in-out;
+}
+
+.overall-progress-bar-container span {
+  position: absolute;
+  right: -35px; /* Position percentage to the right */
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #555;
+  font-weight: bold;
+}
+
+.language-progress-details h4 {
+  font-size: 16px;
+  font-weight: bold;
+  margin-top: 20px;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.start-lesson-btn {
+  background-color: #000; /* Black button as per image */
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 15px;
+  transition: background-color 0.3s ease;
+}
+
+.start-lesson-btn:hover {
+  background-color: #333;
+}
+
+.recent-activity ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.activity-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.activity-item:last-child {
+  border-bottom: none;
+}
+
+.activity-description {
+  font-size: 14px;
+  color: #333;
+}
+
+.activity-meta {
+  text-align: right;
+}
+
+.activity-date {
+  font-size: 12px;
+  color: #777;
+  display: block;
+  margin-bottom: 3px;
+}
+
+.activity-score {
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Styling for Loading and Error States */
+.loading-container,
+.error-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh; /* Take up most of the viewport height */
+  text-align: center;
+  font-size: 1.2em;
+  color: #555;
+}
+
+.error-container p {
+  color: #CE1126; /* Red color for error messages */
+  font-weight: bold;
+}
+
+/* Styles for the Empty State on the Dashboard */
+.dashboard-empty-state {
+  background-color: #FFFFFF; /* White background, consistent with other sections */
+  padding: 40px 25px;
+  margin: 30px 0;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); /* Softer shadow */
+  text-align: center;
+  border-left: 7px solid #007A5E; /* Consistent green accent */
+}
+
+.dashboard-empty-state h3 {
+  font-size: 22px; /* Slightly larger than section titles */
+  color: #007A5E; /* Green to match accent */
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-family: 'Georgia', serif; /* Consistent font */
+}
+
+.dashboard-empty-state p {
+  font-size: 16px;
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 25px;
+  max-width: 600px; /* Limit width for readability */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.empty-state-icon {
+  width: 80px; /* Adjust size as needed */
+  height: 80px;
+  margin-bottom: 20px;
+  opacity: 0.8;
+}
+
+.empty-state-cta {
+  padding: 12px 30px; /* Slightly larger padding for emphasis */
+  font-size: 1.1em;
+}
+
+
 /* Responsive adjustments */
+@media (max-width: 992px) { /* Adjusted breakpoint for better layout on tablets */
+  .summary-stats-cards {
+    flex-wrap: wrap; /* Allow cards to wrap on smaller screens */
+  }
+  .stat-card {
+    flex-basis: calc(50% - 10px); /* Two cards per row */
+    margin-bottom: 20px;
+  }
+}
+
 @media (max-width: 768px) {
-  .dashboard-header h1 {
-    font-size: 2em;
+  .dashboard-header-greeting h2 {
+    font-size: 20px;
   }
-  .dashboard-section {
-    padding: 20px;
+  .dashboard-header-greeting p {
+    font-size: 14px;
   }
-  .gamification-grid {
+  .stat-card {
+    flex-basis: 100%; /* One card per row on small screens */
+  }
+  .language-tabs {
+    overflow-x: auto; /* Allow horizontal scrolling for tabs if many */
+  }
+  .overall-progress-bar-container span {
+    right: 5px; /* Adjust percentage position for smaller screens */
+  }
+  .activity-item {
     flex-direction: column;
+    align-items: flex-start;
   }
-  .gamification-item {
-    margin-bottom: 15px;
-  }
-  .dashboard-button {
-    width: 100%;
-    margin-bottom: 10px;
+  .activity-meta {
+    text-align: left;
+    margin-top: 5px;
   }
 }

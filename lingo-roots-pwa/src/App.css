@@ -36,3 +36,73 @@
     transform: rotate(360deg);
   }
 }
+
+/* General App Header Adjustments */
+.App-header {
+  background-color: #ffffff; /* Changed to white as per image */
+  min-height: auto; /* Remove min-height for a more compact header */
+  padding: 15px 30px; /* Add some padding */
+  display: flex;
+  flex-direction: row; /* Align items in a row */
+  align-items: center;
+  justify-content: space-between; /* Space out logo and nav */
+  font-size: calc(10px + 1vmin); /* Adjusted font size */
+  color: #333333; /* Darker text color for better contrast on white */
+  border-bottom: 1px solid #eeeeee; /* Subtle border */
+}
+
+.App-header h1 {
+  margin: 0;
+  font-size: 1.8em; /* Adjust LingoRoots title size */
+  font-weight: bold;
+}
+
+.App-header a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Main Navigation Styles */
+.main-navigation {
+  display: flex;
+  align-items: center;
+  gap: 20px; /* Spacing between nav items */
+}
+
+.nav-link {
+  color: #333333;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+  font-size: 0.95em;
+}
+
+.nav-link:hover,
+.nav-link.active { /* Assuming an 'active' class might be added later for current page */
+  background-color: #f0f0f0;
+  color: #007bff; /* Example accent color */
+}
+
+.signout-btn {
+  background-color: transparent;
+  color: #333333;
+  border: 1px solid #cccccc;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.signout-btn:hover {
+  background-color: #d9534f; /* A reddish color for sign out hover */
+  color: white;
+  border-color: #d43f3a;
+}
+
+.user-email-display {
+  font-size: 0.8em;
+  color: #555555;
+  margin-left: 15px; /* Space it from the sign out button if it were visible */
+}

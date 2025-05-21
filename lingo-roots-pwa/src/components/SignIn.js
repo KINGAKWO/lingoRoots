@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './SignIn.css'; // Import the CSS file
 import { auth } from '../firebase'; // Import auth from your firebase.js file
 import { signInWithEmailAndPassword } from "firebase/auth";
 
@@ -21,30 +22,43 @@ const SignIn = () => {
   };
 
   return (
-    <div>
-      <h2>Sign In</h2>
-      <form onSubmit={handleSignIn}>
-        <div>
-          <label>Email:</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+    <div className="signin-page-container">
+      <div className="signin-form-container">
+        <h2>Welcome back</h2>
+        <p className="subtitle">Enter your email and password to sign in to your account</p>
+        <form onSubmit={handleSignIn} className="signin-form">
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="akwomakkingguersho@gmail.com"
+              required
+            />
+          </div>
+          <div className="form-group">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <label htmlFor="password">Password</label>
+              <a href="/forgot-password" className="forgot-password-link">Forgot password?</a>
+            </div>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••••"
+              required
+            />
+          </div>
+          {error && <p className="error-message">{error}</p>}
+          <button type="submit" className="signin-btn">Sign In</button>
+        </form>
+        <div className="signup-prompt">
+          Don't have an account? <a href="/signup" className="signup-link">Sign up</a>
         </div>
-        <div>
-          <label>Password:</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        <button type="submit">Sign In</button>
-      </form>
+      </div>
     </div>
   );
 };

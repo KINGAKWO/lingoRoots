@@ -7,6 +7,7 @@ import SignUp from './components/SignUp';
 import SignIn from './components/SignIn';
 import LanguageDashboard from './components/LanguageDashboards';
 import Dashboard from './components/Dashboard'; // Import Dashboard component
+import LandingPage from './components/LandingPage/LandingPage'; // Import LandingPage component
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -41,16 +42,21 @@ function App() {
     <Router>
       <div className="App">
         <header className="App-header">
-          <Link to={currentUser ? "/dashboard" : "/signin"} style={{ textDecoration: 'none', color: 'inherit' }}>
+          <Link to={currentUser ? "/dashboard" : "/"}> {/* Removed inline style */}
             <h1>LingoRoots</h1>
           </Link>
           {currentUser && (
-            <nav style={{ marginBottom: '20px' }}>
-              <Link to="/dashboard" style={{ marginRight: '10px' }}>Dashboard</Link>
-              <Link to="/lessons" style={{ marginRight: '10px' }}>Lessons</Link>
-              {/* Add other navigation links here as needed */}
-              <button onClick={handleSignOut} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', textDecoration: 'underline', fontSize: '1em' }}>Sign Out</button>
-              <p style={{ fontSize: '0.8em', marginTop: '5px' }}>Logged in as: {currentUser.email}</p>
+            <nav className="main-navigation"> {/* Changed class, removed inline style */}
+              <Link to="/dashboard" className="nav-link">Home</Link>
+              <Link to="/dashboard" className="nav-link">Dashboard</Link>
+              <Link to="/lessons" className="nav-link">Languages</Link>
+              <Link to="/about" className="nav-link">About</Link> {/* Added About link, assumes /about route will be handled */}
+              <Link to="/profile" className="nav-link">Profile</Link>
+              <button onClick={handleSignOut} className="nav-link signout-btn">
+                {/* Icon can be added here e.g. <FaSignOutAlt /> */}
+                Sign Out
+              </button>
+              {/* <p className="user-email-display">Logged in as: {currentUser.email}</p> */}
             </nav>
           )}
         </header>
@@ -67,10 +73,11 @@ function App() {
               </>
             ) : (
               <>
+                <Route path="/" element={<LandingPage />} />
                 <Route path="/signin" element={<SignIn />} />
                 <Route path="/signup" element={<SignUp />} />
-                {/* Default route for non-logged-in users */}
-                <Route path="/*" element={<Navigate to="/signin" replace />} />
+                {/* Default route for non-logged-in users, if no other match, show landing */}
+                <Route path="/*" element={<Navigate to="/" replace />} />
               </>
             )}
           </Routes>

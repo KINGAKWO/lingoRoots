@@ -1,0 +1,184 @@
+/* Profile Page Styles */
+.profile-page-container {
+  padding: 20px;
+  font-family: 'Arial', 'Helvetica Neue', Helvetica, sans-serif;
+  background-color: #ffffff; /* White background for the page */
+  min-height: 100vh;
+  color: #333333;
+  max-width: 900px; /* Max width for better readability on large screens */
+  margin: 0 auto; /* Center the content */
+}
+
+.profile-header {
+  margin-bottom: 30px;
+}
+
+.profile-header h1 {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.profile-header p {
+  font-size: 16px;
+  color: #555;
+}
+
+.user-info-section {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 30px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.user-avatar-container {
+  margin-right: 20px;
+}
+
+.user-avatar-placeholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: #e0e0e0; /* Light grey placeholder */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  color: #777;
+}
+
+.user-details h2 {
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.user-details p {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+.user-language-tags span {
+  background-color: #f0f0f0;
+  color: #555;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 12px;
+  margin-right: 8px;
+}
+
+.profile-tabs {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.tab-button {
+  padding: 10px 20px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  font-size: 16px;
+  color: #555;
+  border-bottom: 3px solid transparent;
+  margin-right: 10px;
+  transition: color 0.3s ease, border-bottom-color 0.3s ease;
+}
+
+.tab-button.active {
+  color: #333333; /* Darker color for active tab */
+  font-weight: bold;
+  border-bottom-color: #333333;
+}
+
+.tab-button:hover {
+  color: #000000;
+}
+
+.tab-content {
+  background-color: #f9f9f9; /* Light background for tab content area */
+  padding: 25px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.account-info-content h3 {
+  font-size: 20px;
+  font-weight: bold;
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.account-info-content p {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.account-form .form-group {
+  margin-bottom: 20px;
+}
+
+.account-form label {
+  display: block;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.account-form input[type="text"],
+.account-form input[type="email"] {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #cccccc;
+  border-radius: 5px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+.save-changes-btn {
+  background-color: #000000; /* Black button */
+  color: #ffffff;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.save-changes-btn:hover {
+  background-color: #333333;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .profile-page-container {
+    padding: 15px;
+  }
+
+  .user-info-section {
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .user-avatar-container {
+    margin-right: 0;
+    margin-bottom: 15px;
+  }
+
+  .profile-tabs {
+    overflow-x: auto;
+  }
+
+  .tab-button {
+    padding: 10px 15px;
+    font-size: 14px;
+  }
+}

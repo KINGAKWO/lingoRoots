@@ -1,167 +1,185 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom'; // Import Link for navigation
 import './LandingPage.css';
+import { db } from '../../firebase'; // Import Firestore instance
+import { collection, getDocs, query } from 'firebase/firestore'; // Import Firestore functions
+// Placeholder icons - replace with actual SVGs or a library like react-icons
+import { FaGlobeAfrica, FaUserGraduate, FaLaptopCode, FaHeadphonesAlt, FaComments, FaLanguage, FaChalkboardTeacher } from 'react-icons/fa'; 
+
+// Hardcoded languagesData removed as it will be fetched from Firestore
+
+const testimonialsData = [
+  {
+    id: 1,
+    avatar: FaComments, // Placeholder, consider actual images or more specific icons
+    name: "Marie T.",
+    role: "Student",
+    quote: "LingoRoots helped me connect with my heritage in a way I never thought possible. I can now have basic conversations with my grandparents in Ghomala'!"
+  },
+  {
+    id: 2,
+    avatar: FaComments,
+    name: "Jean P.",
+    role: "Professional",
+    quote: "The personalized approach made all the difference. Other apps felt generic, but LingoRoots adapts to how I learn best."
+  },
+  {
+    id: 3,
+    avatar: FaComments,
+    name: "Samuel K.",
+    role: "Parent",
+    quote: "As someone teaching my children about their roots, LingoRoots has been an invaluable resource for our family to learn Ewondo together."
+  }
+];
 
 const LandingPage = () => {
+  const [fetchedLanguagesData, setFetchedLanguagesData] = useState([]);
+  const [loadingLanguages, setLoadingLanguages] = useState(true);
+  const [errorLanguages, setErrorLanguages] = useState(null);
+
+  useEffect(() => {
+    const fetchLanguages = async () => {
+      setLoadingLanguages(true);
+      setErrorLanguages(null);
+      try {
+        const languagesCollectionRef = collection(db, 'languages');
+        // Optionally, add orderBy if your languages have an 'order' field or similar
+        // const q = query(languagesCollectionRef, orderBy('name')); 
+        const q = query(languagesCollectionRef); // Simple query for now
+        const querySnapshot = await getDocs(q);
+        const languagesList = querySnapshot.docs.map(doc => ({ 
+          id: doc.id, 
+          icon: FaLanguage, // Using placeholder icon for now
+          ...doc.data() 
+        }));
+        setFetchedLanguagesData(languagesList);
+      } catch (err) {
+        console.error("Error fetching languages:", err);
+        setErrorLanguages("Failed to load languages. " + err.message);
+      }
+      setLoadingLanguages(false);
+    };
+
+    fetchLanguages();
+  }, []);
+
   return (
-    <div className="landing-page">
+    <div className="landing-page-container">
+      {/* Navigation Bar */}
+      <nav className="navbar">
+        <div className="navbar-logo">
+          <Link to="/">LingoRoots</Link>
+        </div>
+        <div className="navbar-links">
+          <Link to="/">Home</Link>
+          {/* Links to Dashboard, Languages, About removed for non-authenticated users */}
+          {/* <Link to="/about">About</Link> */}
+          <Link to="/signin" className="nav-signin">Sign In</Link>
+          <Link to="/signup" className="nav-signup btn-primary">Sign Up</Link>
+        </div>
+      </nav>
+
       {/* Hero Section */}
-      <section className="hero-section">
-        <div className="hero-content">
-          <p className="sub-heading">Preserving indigenous languages</p>
-          <h1>Learn indigenous languages, anywhere</h1>
-          <p className="description">
-            LinguaRoots helps you learn and preserve indigenous languages with a text-first approach that works even with limited internet access.
-          </p>
-          <div className="cta-buttons">
-            <button className="btn btn-primary">Get Started</button>
-            <button className="btn btn-secondary">Learn More</button>
-          </div>
-          <div className="hero-features">
-            <span>No credit card required</span>
-            <span>Works offline</span>
+      <section className="hero-section-new">
+        <div className="hero-content-new">
+          <h1>Discover Your Roots Through Language</h1>
+          <p>Learn your mother tongue with personalized lessons tailored to your learning style and pace.</p>
+          <div className="hero-buttons">
+            <Link to="/signup" className="btn btn-start-learning">Start Learning</Link>
+            <Link to="/about" className="btn btn-learn-more">Learn More</Link>
           </div>
         </div>
-        <div className="hero-image-placeholder">
-          {/* Placeholder for image */}
+        <div className="hero-image-placeholder-new">
+          {/* Placeholder for an engaging image or illustration */}
+          {/* Replace with actual images or SVGs */}
+          {/* Example: <img src="path_to_image.png" alt="Language Learning Illustration" /> */}
+          <img src="/logo.jpg" alt="Language Learning Illustration" style={{ maxWidth: '100%', display: 'block' }} />
+          {/* <FaGlobeAfrica size={150} className="placeholder-icon" /> */}
         </div>
       </section>
 
-      {/* Discover Indigenous Languages Section */}
-      <section className="discover-languages-section">
-        <h2>Discover Indigenous Languages</h2>
-        <p>Explore and learn languages that are at risk of being lost to history</p>
-        <div className="language-cards">
-          {/* Language cards will be mapped here */}
-          <div className="language-card">Bafaw <small>Western Cameroon • 25,000+ speakers</small></div>
-          <div className="language-card">Bassa <small>Coastal Cameroon • 160,000+ speakers</small></div>
-          <div className="language-card">Duala <small>Littoral Region • 87,000+ speakers</small></div>
-          <div className="language-card">Ewondo <small>Central Region • 578,000+ speakers</small></div>
-          <div className="language-card">Fulfulde <small>Northern Cameroon • 1.5M+ speakers</small></div>
+      {/* Discover Our Languages Section */}
+      {/* Discover Our Languages Section */}
+      <section className="discover-languages-section-new">
+        <h2>Discover Our Languages</h2>
+        <p>Explore and connect with your cultural heritage through these rich languages.</p>
+        <div className="language-cards-container-new">
+          {loadingLanguages && <p>Loading languages...</p>}
+          {errorLanguages && <p style={{ color: 'red' }}>{errorLanguages}</p>}
+          {!loadingLanguages && !errorLanguages && fetchedLanguagesData.length === 0 && <p>No languages available at the moment.</p>}
+          {!loadingLanguages && !errorLanguages && fetchedLanguagesData.map(lang => (
+            <div key={lang.id} className="language-card-new">
+              <div className="language-card-icon-placeholder"><lang.icon size={40}/></div>
+              <h3>{lang.name}</h3>
+              <p className="speakers">{lang.speakers}</p>
+              <p className="description">{lang.description}</p>
+            </div>
+          ))}
         </div>
-        <button className="btn btn-outline">View All Languages</button>
       </section>
 
-      {/* Why Choose LinguaRoots Section */}
-      <section className="why-choose-us-section">
-        <h2>Why Choose LinguaRoots</h2>
-        <p>Our platform is designed with cultural preservation and accessibility in mind</p>
-        <div className="features-grid">
-          <div className="feature-item">
-            {/* Icon placeholder */}
-            <h3>Text-First Learning</h3>
-            <p>Optimized for low-bandwidth environments with a focus on text-based lessons...</p>
+      {/* How LingoRoots Works Section */}
+      <section className="how-it-works-section-new">
+        <h2>How LingoRoots Works</h2>
+        <p>Our personalized approach makes learning ancestral languages accessible and engaging.</p>
+        <div className="steps-container-new">
+          <div className="step-card-new">
+            <div className="step-icon-placeholder"><FaChalkboardTeacher size={40}/></div>
+            <span className="step-number-new">1</span>
+            <h3>Choose Your Language</h3>
+            <p>Select from our available languages to begin your learning journey.</p>
           </div>
-          <div className="feature-item">
-            {/* Icon placeholder */}
-            <h3>Offline Functionality</h3>
-            <p>Download lessons and continue learning without internet access...</p>
+          <div className="step-card-new">
+            <div className="step-icon-placeholder"><FaUserGraduate size={40}/></div>
+            <span className="step-number-new">2</span>
+            <h3>Personalized Learning</h3>
+            <p>Our system adapts to your learning style and pace for optimal progress.</p>
           </div>
-          <div className="feature-item">
-            {/* Icon placeholder */}
-            <h3>Cultural Context</h3>
-            <p>Learn language within its cultural framework...</p>
+          <div className="step-card-new">
+            <div className="step-icon-placeholder"><FaLaptopCode size={40}/></div>
+            <span className="step-number-new">3</span>
+            <h3>Practice & Progress</h3>
+            <p>Complete interactive exercises and track your improvement over time.</p>
           </div>
-          <div className="feature-item">
-            {/* Icon placeholder */}
-            <h3>Special Character Support</h3>
-            <p>Proper rendering of language-specific characters...</p>
-          </div>
-          <div className="feature-item">
-            {/* Icon placeholder */}
-            <h3>Community Verified</h3>
-            <p>Content reviewed by native speakers...</p>
-          </div>
-          <div className="feature-item">
-            {/* Icon placeholder */}
-            <h3>Mobile-First Design</h3>
-            <p>Optimized for learning on any device...</p>
+          <div className="step-card-new">
+            <div className="step-icon-placeholder"><FaHeadphonesAlt size={40}/></div>
+            <span className="step-number-new">4</span>
+            <h3>Listen & Speak</h3>
+            <p>Develop your pronunciation with audio examples from native speakers.</p>
           </div>
         </div>
       </section>
 
-      {/* How It Works Section */}
-      <section className="how-it-works-section">
-        <h2>How It Works</h2>
-        <p>Start your language learning journey in three simple steps</p>
-        <div className="steps-container">
-          <div className="step-item">
-            <span>1</span>
-            <h3>Choose a Language</h3>
-            <p>Select from our growing collection of indigenous languages to begin your learning journey</p>
-          </div>
-          <div className="step-item">
-            <span>2</span>
-            <h3>Complete Lessons</h3>
-            <p>Work through structured lessons with text, audio, and cultural context at your own pace</p>
-          </div>
-          <div className="step-item">
-            <span>3</span>
-            <h3>Practice & Improve</h3>
-            <p>Test your knowledge with quizzes and track your progress as you build fluency</p>
-          </div>
-        </div>
-        <button className="btn btn-primary">Start Learning Now</button>
-      </section>
-
-      {/* Join the Movement Section */}
-      <section className="join-movement-section">
-        <div className="join-movement-content">
-          <h2>Join the Movement</h2>
-          <p>Help preserve indigenous languages for future generations. Start your learning journey today with LinguaRoots.</p>
-          <div className="cta-buttons">
-            <button className="btn btn-light">Create Free Account</button>
-            <button className="btn btn-outline-dark">Learn More</button>
-          </div>
-        </div>
-        <div className="stats">
-          <div><strong>5+</strong> Languages</div>
-          <div><strong>100+</strong> Lessons</div>
-          <div><strong>1000+</strong> Learners</div>
+      {/* What Our Learners Say Section */}
+      {/* What Our Learners Say Section */}
+      <section className="testimonials-section-new">
+        <h2>What Our Learners Say</h2>
+        <p>Join thousands who are reconnecting with their cultural heritage through language.</p>
+        <div className="testimonial-cards-container-new">
+          {testimonialsData.map(testimonial => (
+            <div key={testimonial.id} className="testimonial-card-new">
+              <div className="testimonial-avatar-placeholder"><testimonial.avatar size={30}/></div>
+              <h4>{testimonial.name}</h4>
+              <p className="learner-role">{testimonial.role}</p>
+              <blockquote>{testimonial.quote}</blockquote>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* Our Partners Section */}
-      <section className="partners-section">
-        <h2>Our Partners</h2>
-        <p>Working together to preserve linguistic diversity</p>
-        <div className="partner-logos">
-          {/* Partner logo placeholders */}
-          <div className="partner-logo-placeholder"></div>
-          <div className="partner-logo-placeholder"></div>
-          <div className="partner-logo-placeholder"></div>
-          <div className="partner-logo-placeholder"></div>
-        </div>
+      {/* Ready to Begin Section (Footer CTA) */}
+      <section className="cta-footer-section-new">
+        <h2>Ready to Begin Your Language Journey?</h2>
+        <p>Join thousands of learners discovering their cultural heritage through language.</p>
+        <Link to="/signup" className="btn btn-signup-free">Sign Up Free</Link>
       </section>
 
-      {/* FAQ Section */}
-      <section className="faq-section">
-        <h2>Frequently Asked Questions</h2>
-        <p>Find answers to common questions about LinguaRoots</p>
-        <div className="faq-grid">
-          <div className="faq-item">
-            <h3>How does offline mode work?</h3>
-            <p>You can download lessons to your device when you have internet access...</p>
-          </div>
-          <div className="faq-item">
-            <h3>Are the lessons created by native speakers?</h3>
-            <p>Yes, all our content is created and verified by native speakers...</p>
-          </div>
-          <div className="faq-item">
-            <h3>How much does LinguaRoots cost?</h3>
-            <p>LinguaRoots offers a free tier with access to basic lessons...</p>
-          </div>
-          <div className="faq-item">
-            <h3>Can I suggest a language to add?</h3>
-            <p>We're always looking to expand our language offerings...</p>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer (Implicit from images, can be a separate component later) */}
-      <footer className="footer-section">
-        <p>&copy; {new Date().getFullYear()} LinguaRoots. All rights reserved.</p>
-        {/* Add other footer links/info as needed */}
+      {/* A simple footer can be added if needed, distinct from the CTA section */}
+      <footer className="main-footer-new">
+        <p>&copy; {new Date().getFullYear()} LingoRoots. All rights reserved.</p>
+        {/* Optional: Add links to privacy policy, terms, etc. */}
       </footer>
+
     </div>
   );
 };

@@ -4,7 +4,6 @@ import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import LessonList from './LessonList'; // We'll create this next
 
 const LanguageDashboard = ({ languageId = "Duala", userId}) => {
-  const [language, setLanguage] = useState(null);
   const [lessons, setLessons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -19,7 +18,7 @@ const LanguageDashboard = ({ languageId = "Duala", userId}) => {
         // const langDocRef = doc(db, "languages", languageId);
         // const langDocSnap = await getDoc(langDocRef);
         // if (langDocSnap.exists()) {
-        //   setLanguage({ id: langDocSnap.id, ...langDocSnap.data() });
+        //   // setLanguage({ id: langDocSnap.id, ...langDocSnap.data() }); // Removed as language state is not used
         // } else {
         //   setError("Language not found");
         //   setLoading(false);

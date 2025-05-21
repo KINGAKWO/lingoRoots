@@ -1,0 +1,497 @@
+/* General Styles */
+body, html {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: #FFFFFF; /* Predominantly white background */
+  color: #111827; /* Dark gray for text */
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.landing-page-container {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Global Link Styles */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Utility Classes */
+.btn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+  display: inline-block;
+  text-align: center;
+}
+
+.btn-primary {
+  background-color: #111827; /* Dark button */
+  color: #FFFFFF;
+}
+
+.btn-primary:hover {
+  background-color: #374151; /* Slightly lighter dark */
+}
+
+/* Navigation Bar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 5%;
+  background-color: #FFFFFF;
+  border-bottom: 1px solid #E5E7EB; /* Light gray border */
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.navbar-logo a {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+}
+
+.navbar-links a {
+  color: #4B5563; /* Medium gray for nav links */
+  font-weight: 500;
+  padding: 8px 0;
+}
+
+.navbar-links a:hover {
+  color: #111827;
+}
+
+.nav-signin {
+  /* Specific styling if different from other links */
+}
+
+.nav-signup.btn-primary {
+  padding: 8px 16px; /* Slightly smaller padding for nav button */
+}
+
+/* Hero Section New */
+.hero-section-new {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 80px 5%;
+  background-color: #FFFFFF;
+  min-height: 70vh;
+}
+
+.hero-content-new {
+  max-width: 550px;
+}
+
+.hero-content-new h1 {
+  font-size: 3rem; /* Large heading */
+  font-weight: 800;
+  color: #111827;
+  line-height: 1.2;
+  margin-bottom: 20px;
+}
+
+.hero-content-new p {
+  font-size: 1.125rem;
+  color: #4B5563;
+  margin-bottom: 30px;
+}
+
+.hero-buttons .btn {
+  margin-right: 15px;
+  font-size: 1rem;
+}
+
+.btn-start-learning {
+  background-color: #111827;
+  color: #FFFFFF;
+  padding: 12px 24px;
+}
+.btn-start-learning:hover {
+  background-color: #374151;
+}
+
+.btn-learn-more {
+  background-color: #FFFFFF;
+  color: #111827;
+  border: 1px solid #D1D5DB; /* Light gray border */
+  padding: 12px 24px;
+}
+
+.btn-learn-more:hover {
+  background-color: #F9FAFB; /* Very light gray on hover */
+}
+
+.hero-image-placeholder-new {
+  width: 40%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #F3F4F6; /* Light gray background for placeholder */
+  border-radius: 12px;
+  min-height: 300px; /* Ensure it has some height */
+  overflow: hidden; /* Ensure child (image) respects border-radius */
+}
+
+.hero-image-placeholder-new img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Scales the image to maintain aspect ratio while filling the element's entire content box */
+  display: block; /* Removes extra space below the image */
+}
+
+.placeholder-icon {
+  color: #9CA3AF; /* Medium gray for icon */
+}
+
+/* Discover Languages Section New */
+.discover-languages-section-new {
+  padding: 80px 5%;
+  background-color: #F9FAFB; /* Off-white background */
+  text-align: center;
+}
+
+.discover-languages-section-new h2 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.discover-languages-section-new > p {
+  font-size: 1.125rem;
+  color: #4B5563;
+  max-width: 600px;
+  margin: 0 auto 40px auto;
+}
+
+.language-cards-container-new {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.language-card-new {
+  background-color: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 30px;
+  width: 300px;
+  text-align: left;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.05);
+}
+
+.language-card-icon-placeholder {
+  background-color: #F3F4F6;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  color: #111827;
+}
+
+.language-card-new h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.language-card-new .speakers {
+  font-size: 0.875rem;
+  color: #6B7280; /* Lighter gray */
+  margin-bottom: 12px;
+}
+
+.language-card-new .description {
+  font-size: 1rem;
+  color: #4B5563;
+}
+
+/* How LingoRoots Works Section New */
+.how-it-works-section-new {
+  padding: 80px 5%;
+  background-color: #FFFFFF;
+  text-align: center;
+}
+
+.how-it-works-section-new h2 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.how-it-works-section-new > p {
+  font-size: 1.125rem;
+  color: #4B5563;
+  max-width: 700px;
+  margin: 0 auto 50px auto;
+}
+
+.steps-container-new {
+  display: flex;
+  justify-content: space-around; /* Changed to space-around for better distribution */
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.step-card-new {
+  background-color: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 30px;
+  width: calc(25% - 22.5px); /* Adjust for 4 cards with gap */
+  min-width: 220px; /* Ensure cards don't get too small */
+  text-align: left;
+  box-shadow: 0 1px 3px 0 rgba(0,0,0,0.07), 0 1px 2px 0 rgba(0,0,0,0.05);
+  position: relative;
+}
+
+.step-icon-placeholder {
+  background-color: #E0E7FF; /* Light indigo background for icon */
+  color: #3730A3; /* Indigo color for icon */
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.step-number-new {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background-color: #111827;
+  color: #FFFFFF;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.step-card-new h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 30px; /* Space for number */
+  margin-bottom: 10px;
+}
+
+.step-card-new p {
+  font-size: 0.95rem;
+  color: #4B5563;
+}
+
+/* Testimonials Section New */
+.testimonials-section-new {
+  padding: 80px 5%;
+  background-color: #F9FAFB;
+  text-align: center;
+}
+
+.testimonials-section-new h2 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.testimonials-section-new > p {
+  font-size: 1.125rem;
+  color: #4B5563;
+  max-width: 700px;
+  margin: 0 auto 50px auto;
+}
+
+.testimonial-cards-container-new {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.testimonial-card-new {
+  background-color: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 30px;
+  width: 320px;
+  text-align: left;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.05);
+}
+
+.testimonial-avatar-placeholder {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #D1D5DB; /* Placeholder color */
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4B5563;
+}
+
+.testimonial-card-new h4 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.testimonial-card-new .learner-role {
+  font-size: 0.875rem;
+  color: #6B7280;
+  margin-bottom: 15px;
+}
+
+.testimonial-card-new blockquote {
+  font-size: 1rem;
+  color: #374151;
+  font-style: italic;
+  border-left: 3px solid #9CA3AF;
+  padding-left: 15px;
+  margin: 0;
+}
+
+/* CTA Footer Section New */
+.cta-footer-section-new {
+  padding: 80px 5%;
+  background-color: #111827; /* Dark background */
+  color: #FFFFFF;
+  text-align: center;
+}
+
+.cta-footer-section-new h2 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.cta-footer-section-new > p {
+  font-size: 1.125rem;
+  color: #D1D5DB; /* Lighter text on dark background */
+  max-width: 600px;
+  margin: 0 auto 30px auto;
+}
+
+.btn-signup-free {
+  background-color: #FFFFFF;
+  color: #111827;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.btn-signup-free:hover {
+  background-color: #F3F4F6;
+}
+
+/* Main Footer New */
+.main-footer-new {
+  padding: 30px 5%;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #6B7280;
+  border-top: 1px solid #E5E7EB;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .hero-section-new {
+    flex-direction: column;
+    text-align: center;
+  }
+  .hero-content-new {
+    max-width: 100%;
+    margin-bottom: 40px;
+  }
+  .hero-image-placeholder-new {
+    width: 60%;
+    min-height: 250px;
+  }
+  .language-card-new, .testimonial-card-new {
+    width: calc(50% - 15px); /* Two cards per row */
+  }
+  .step-card-new {
+    width: calc(50% - 15px); /* Two cards per row */
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 15px 3%;
+  }
+  .navbar-links {
+    display: none; /* Basic mobile menu: hide links, implement toggle later */
+    /* For a real app, a hamburger menu would be implemented here */
+  }
+  .nav-signup.btn-primary, .nav-signin {
+    /* Adjust if they are still visible or part of a mobile menu */
+  }
+
+  .hero-content-new h1 {
+    font-size: 2.5rem;
+  }
+  .hero-content-new p {
+    font-size: 1rem;
+  }
+  .hero-image-placeholder-new {
+    width: 80%;
+  }
+
+  .language-cards-container-new, .testimonial-cards-container-new, .steps-container-new {
+    flex-direction: column;
+    align-items: center;
+  }
+  .language-card-new, .testimonial-card-new, .step-card-new {
+    width: 90%;
+    max-width: 400px; /* Max width for single column cards */
+  }
+
+  .discover-languages-section-new h2,
+  .how-it-works-section-new h2,
+  .testimonials-section-new h2,
+  .cta-footer-section-new h2 {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-content-new h1 {
+    font-size: 2rem;
+  }
+  .hero-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  .hero-buttons .btn {
+    width: 100%;
+    margin-right: 0;
+  }
+  .language-card-new, .testimonial-card-new, .step-card-new {
+    width: 100%;
+  }
+}

@@ -1,0 +1,221 @@
+:root {
+  --primary-color: #111827; /* Dark gray, consistent with landing page */
+  --secondary-color: #4B5563; /* Medium gray */
+  --accent-color: #3B82F6; /* A modern blue for accents if needed */
+  --background-color: #F9FAFB; /* Light off-white, consistent with landing */
+  --form-background-color: #FFFFFF;
+  --text-color: #1F2937; /* Slightly lighter dark gray for text */
+  --label-color: #374151;
+  --input-border-color: #D1D5DB;
+  --input-focus-border-color: var(--primary-color);
+  --error-color: #EF4444; /* Red for errors */
+  --success-color: #10B981; /* Green for success messages */
+}
+
+.signup-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: var(--background-color);
+  padding: 20px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.signup-form-wrapper {
+  background-color: var(--form-background-color);
+  padding: 32px 40px; /* Adjusted padding */
+  border-radius: 12px; /* Softer radius */
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  max-width: 480px; /* Slightly wider for better spacing */
+  text-align: center;
+}
+
+.signup-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.signup-logo img {
+  height: 32px; /* Slightly larger logo */
+  margin-right: 10px;
+}
+
+.signup-logo span {
+  font-size: 1.75rem; /* Larger logo text */
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.signup-form-wrapper h2 {
+  font-size: 1.875rem; /* Slightly larger heading */
+  color: var(--text-color);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.signup-form-wrapper .sub-heading {
+  font-size: 1rem;
+  color: var(--secondary-color);
+  margin-bottom: 32px;
+}
+
+.signup-form .form-group {
+  margin-bottom: 24px; /* Increased spacing */
+  text-align: left;
+}
+
+.signup-form .form-row {
+  display: flex;
+  gap: 20px; /* Increased gap */
+  margin-bottom: 24px;
+}
+
+.signup-form .form-row .form-group {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.signup-form label {
+  display: block;
+  font-size: 0.875rem; /* Slightly smaller label */
+  color: var(--label-color);
+  margin-bottom: 6px;
+  font-weight: 500; /* Medium weight */
+}
+
+.signup-form .label-with-hint {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.signup-form .hint {
+  font-size: 0.75rem;
+  color: var(--secondary-color);
+}
+
+.signup-form input[type="text"],
+.signup-form input[type="email"],
+.signup-form input[type="password"],
+.signup-form select {
+  width: 100%;
+  padding: 10px 12px; /* Adjusted padding */
+  border: 1px solid var(--input-border-color);
+  border-radius: 6px; /* Softer radius */
+  font-size: 0.9375rem; /* Standardized font size */
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  background-color: var(--form-background-color);
+  color: var(--text-color);
+}
+
+.signup-form input[type="text"]::placeholder,
+.signup-form input[type="email"]::placeholder,
+.signup-form input[type="password"]::placeholder {
+  color: #9CA3AF; /* Lighter placeholder text */
+}
+
+.signup-form input[type="text"]:focus,
+.signup-form input[type="email"]:focus,
+.signup-form input[type="password"]:focus,
+.signup-form select:focus {
+  outline: none;
+  border-color: var(--input-focus-border-color);
+  box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.1); /* Focus ring */
+}
+
+.signup-form select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 36px; /* Make space for arrow */
+}
+
+.signup-form .tooltip-icon {
+  margin-left: 6px;
+  color: var(--secondary-color);
+  cursor: help;
+  font-size: 0.875rem;
+}
+
+.signup-form .field-description {
+  font-size: 0.8125rem;
+  color: var(--secondary-color);
+  margin-top: 6px;
+}
+
+.signup-form .checkbox-group {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 28px;
+  text-align: left;
+}
+
+.signup-form .checkbox-group input[type="checkbox"] {
+  margin-top: 4px;
+  margin-right: 10px;
+  width: 18px; /* Slightly larger checkbox */
+  height: 18px;
+  accent-color: var(--primary-color);
+  border-radius: 4px;
+  border: 1px solid var(--input-border-color);
+  cursor: pointer;
+}
+
+.signup-form .checkbox-group label {
+  font-size: 0.875rem;
+  color: var(--label-color);
+  font-weight: 400;
+  line-height: 1.5;
+  margin-bottom: 0;
+}
+
+.signup-form .btn-submit {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.signup-form .btn-submit:hover {
+  background-color: #374151; /* Darker shade of primary */
+}
+
+.signup-form .login-link {
+  margin-top: 28px;
+  font-size: 0.875rem;
+  color: var(--secondary-color);
+}
+
+.signup-form .login-link a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.signup-form .login-link a:hover {
+  text-decoration: underline;
+}
+
+.signup-form .error-message {
+  color: var(--error-color);
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  margin-bottom: 20px; /* Add margin if error is above button */
+  text-align: left;
+}

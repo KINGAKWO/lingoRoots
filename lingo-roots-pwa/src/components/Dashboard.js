@@ -5,139 +5,213 @@ import { Link } from 'react-router-dom';
 import './Dashboard.css'; // Import the CSS file
 
 const Dashboard = ({ userId }) => {
+  const [userData, setUserData] = useState({ firstName: '', lastName: '' });
   const [userProgressData, setUserProgressData] = useState(null);
+  const [selectedLanguageId, setSelectedLanguageId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-
   useEffect(() => {
-    const fetchUserProgress = async () => {
+    const fetchData = async () => {
       if (!userId) {
-        setLoading(false);
         setError('User ID is not available.');
+        setLoading(false);
         return;
       }
       setLoading(true);
       setError(null);
       try {
-        const userProgressRef = doc(db, "userProgress", userId);
-        const docSnap = await getDoc(userProgressRef);
-        if (docSnap.exists()) {
-          setUserProgressData(docSnap.data());
+        // Fetch user details (name)
+        const userDocRef = doc(db, "users", userId);
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists()) {
+          const { firstName, lastName } = userDocSnap.data();
+          setUserData({ firstName: firstName || '', lastName: lastName || '' });
         } else {
-          // Initialize with default structure if no progress found
-          setUserProgressData({
-            overallPercentage: 0,
-            lastLesson: 'No lessons completed yet',
-            dailyQuizCompleted: false,
-            dailyStreak: 0,
-            points: 0,
-            badgesEarned: 0,
-            // Ensure all expected fields have defaults
-            lessonScores: {}, 
-            completedLessons: [],
-            // Add any other fields that your dashboard might expect from userProgress
-          });
-          console.log("No user progress found for user:", userId, ". Initializing with defaults.");
+          console.log("No user document found for name, using defaults.");
+          setUserData({ firstName: 'Demo', lastName: 'User' }); // Default if no user doc
+        }
+
+        // Fetch user progress
+        const progressDocRef = doc(db, "userProgress", userId);
+        const progressDocSnap = await getDoc(progressDocRef);
+        if (progressDocSnap.exists()) {
+          const progressData = progressDocSnap.data();
+          setUserProgressData(progressData);
+          // Set initial selected language
+          if (progressData.languagesProgress && progressData.languagesProgress.length > 0) {
+            setSelectedLanguageId(progressData.languagesProgress[0].id);
+          }
+        } else {
+          console.log("No user progress found, initializing with mock data for UI.");
+          // Fallback to mock data if no progress found, for UI development
+          const mockProgress = {
+            stats: {
+              totalLanguages: 2,
+              currentStreak: 5, 
+              timeSpent: "12.5 hours",
+              averageScore: 87
+            },
+            languagesProgress: [
+              {
+                id: "ghomala",
+                name: "Ghomala",
+                completedLessons: 7,
+                totalLessons: 20,
+                overallProgress: 35,
+                nextLesson: {
+                  title: "Basic Greetings",
+                  description: "Continue your learning journey with the next lesson in your curriculum."
+                },
+                recentActivity: [
+                  { id: "1", description: "Completed Lesson: Numbers 1-10", date: "2023-05-19", score: "85%" },
+                  { id: "2", description: "Vocabulary Practice", date: "2023-05-18", score: "92%" }
+                ]
+              },
+              {
+                id: "ewondo",
+                name: "Ewondo",
+                completedLessons: 3,
+                totalLessons: 15,
+                overallProgress: 20,
+                nextLesson: {
+                  title: "Ewondo Alphabets",
+                  description: "Learn the basic alphabets in Ewondo."
+                },
+                recentActivity: [
+                  { id: "3", description: "Completed Lesson: Greetings", date: "2023-05-20", score: "90%" },
+                ]
+              }
+            ]
+          };
+          setUserProgressData(mockProgress);
+          if (mockProgress.languagesProgress && mockProgress.languagesProgress.length > 0) {
+            setSelectedLanguageId(mockProgress.languagesProgress[0].id);
+          }
         }
       } catch (err) {
-        console.error("Error fetching user progress:", err);
-        setError("Failed to load user progress. " + err.message);
+        console.error("Error fetching dashboard data:", err);
+        setError("Failed to load dashboard data. " + err.message);
         setUserProgressData(null); // Clear data on error
       }
       setLoading(false);
     };
 
-    fetchUserProgress();
+    fetchData();
   }, [userId]);
 
-  // Default structure for userProgress if still null after loading (e.g., error or no data)
-  const userProgress = userProgressData || {
-    overallPercentage: 0,
-    lastLesson: 'Loading...',
-    dailyQuizCompleted: false,
-    dailyStreak: 0,
-    points: 0,
-    badgesEarned: 0,
-  };
+  if (loading) return <div class="loading-container"><p>Loading dashboard...</p></div>;
+  if (error) return <div class="error-container"><p>Error: {error}</p></div>;
 
-  if (loading) return <p>Loading dashboard...</p>;
-  if (error) return <p style={{ color: 'red' }}>Error: {error}</p>;
-  // if (!userProgressData) return <p>No progress data available. Start a lesson to see your progress!</p>; // Optional: specific message if data is null after loading without error
+  // Handle the case where userProgressData is null or languagesProgress is empty
+  if (!userProgressData || !userProgressData.languagesProgress || userProgressData.languagesProgress.length === 0) {
+    const displayName = userData.firstName ? `${userData.firstName}` : 'Learner';
+
+    return (
+      <div className="dashboard-page-container">
+        <div className="dashboard-header-greeting">
+          <h2>Welcome, {displayName}!</h2>
+          <p>Your language learning adventure starts here.</p>
+        </div>
+        <div className="dashboard-empty-state">
+          {/* Optional: <img src="/path/to/illustration.svg" alt="Start learning" className="empty-state-icon" /> */}
+          <h3>It's Time to Learn Something New!</h3>
+          <p>
+            You haven't started any language lessons yet.
+            Explore our available languages and begin your first lesson today.
+          </p>
+          <Link to="/lessons" className="dashboard-button button-green empty-state-cta">
+            Explore Lessons & Start Your First One
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const { stats, languagesProgress } = userProgressData;
+  const selectedLanguageData = languagesProgress.find(lang => lang.id === selectedLanguageId);
+  const userName = userData.firstName && userData.lastName ? `${userData.firstName} ${userData.lastName}` : (userData.firstName || userData.lastName || 'Demo User');
 
   return (
-    <div className="dashboard-container">
-      <header className="dashboard-header">
-        <h1>Welcome Back!</h1>
-        <p>Let's continue your language learning journey.</p>
-      </header>
+    <div className="dashboard-page-container"> {/* Updated class name for consistency */}
+      <div className="dashboard-header-greeting">
+        <h2>Welcome back, {userName}</h2>
+        <p>Track your progress and continue your language learning journey.</p>
+      </div>
 
-      {/* Continue Learning Section */}
-      <section className="dashboard-section continue-learning-section">
-        <h2>Continue Learning</h2>
-        <p>Your last lesson: <strong>{userProgress.lastLesson}</strong></p>
-        <div className="progress-bar-container">
-          <div 
-            className="progress-bar" 
-            style={{ width: `${userProgress.overallPercentage}%` }}
+      <div className="summary-stats-cards">
+        <div className="stat-card">
+          <div className="stat-icon">TL</div> {/* Placeholder for icon */}
+          <div className="stat-value">{stats?.totalLanguages || 0}</div>
+          <div className="stat-label">Total Languages</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon">CS</div> {/* Placeholder for icon */}
+          <div className="stat-value">{stats?.currentStreak || 0} days</div>
+          <div className="stat-label">Current Streak</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon">TS</div> {/* Placeholder for icon */}
+          <div className="stat-value">{stats?.timeSpent || '0 hours'}</div>
+          <div className="stat-label">Time Spent</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon">AS</div> {/* Placeholder for icon */}
+          <div className="stat-value">{stats?.averageScore || 0}%</div>
+          <div className="stat-label">Average Score</div>
+        </div>
+      </div>
+
+      <div className="language-tabs">
+        {languagesProgress.map(lang => (
+          <button 
+            key={lang.id} 
+            className={`language-tab-btn ${selectedLanguageId === lang.id ? 'active' : ''}`}
+            onClick={() => setSelectedLanguageId(lang.id)}
           >
-            {userProgress.overallPercentage}%
-          </div>
-        </div>
-        <Link to="/lessons" className="dashboard-button button-green">
-          Resume Lesson
-        </Link>
-      </section>
+            {lang.name}
+          </button>
+        ))}
+      </div>
 
-      {/* Daily Quiz Section */}
-      <section className="dashboard-section daily-quiz-section">
-        <h2>Daily Quiz</h2>
-        {userProgress.dailyQuizCompleted ? (
-          <p>You've completed today's quiz. Great job!</p>
-        ) : (
-          <p>Test your knowledge with a quick daily quiz!</p>
-        )}
-        <Link 
-          to="/lessons" /* Assuming quiz is part of lessons for now */ 
-          className={`dashboard-button button-red ${userProgress.dailyQuizCompleted ? 'disabled' : ''}`}
-          aria-disabled={userProgress.dailyQuizCompleted}
-        >
-          {userProgress.dailyQuizCompleted ? 'View Results' : 'Start Daily Quiz'}
-        </Link>
-      </section>
-
-      {/* Gamification: Streaks, Points, Badges */}
-      <section className="dashboard-section gamification-elements-section">
-        <h2>Your Achievements</h2>
-        <div className="gamification-grid">
-          <div className="gamification-item streak-item">
-            <h3>🔥 Streaks</h3>
-            <p>{userProgress.dailyStreak} Days</p>
+      {selectedLanguageData && (
+        <>
+          <div className="language-progress-details">
+            <h3>{selectedLanguageData.name} Progress</h3>
+            <p>You've completed {selectedLanguageData.completedLessons} out of {selectedLanguageData.totalLessons} lessons</p>
+            <div className="overall-progress-bar-container">
+              <div className="overall-progress-bar" style={{ width: `${selectedLanguageData.overallProgress}%` }}></div>
+              <span>{selectedLanguageData.overallProgress}%</span>
+            </div>
+            <h4>Next Lesson: {selectedLanguageData.nextLesson.title}</h4>
+            <p>{selectedLanguageData.nextLesson.description}</p>
+            {/* Assuming /lessons/:languageId/:lessonId or similar structure */}
+            <Link to={`/lessons/${selectedLanguageData.id}`} className="start-lesson-btn">
+                Start Lesson
+            </Link>
           </div>
-          <div className="gamification-item points-item">
-            <h3>⭐ Points</h3>
-            <p>{userProgress.points}</p>
-          </div>
-          <div className="gamification-item badges-item">
-            <h3>🏆 Badges</h3>
-            <p>{userProgress.badgesEarned} Earned</p>
-          </div>
-        </div>
-      </section>
 
-      {/* Cultural Corner Section - Placeholder */}
-      <section className="dashboard-section cultural-corner-section">
-        <h2>Cultural Corner</h2>
-        <p>Discover interesting facts and cultural insights related to your chosen languages.</p>
-        {/* Link to a future /culture page */}
-        <Link to="/lessons" className="dashboard-button button-yellow">
-          Explore Culture
-        </Link>
-      </section>
-
-      <footer className="dashboard-footer">
-        <p>Keep up the great work! Consistency is key to language mastery.</p>
-      </footer>
+          <div className="recent-activity">
+            <h3>Recent Activity</h3>
+            <p>Your learning activity for the past 7 days</p>
+            {selectedLanguageData.recentActivity && selectedLanguageData.recentActivity.length > 0 ? (
+              <ul>
+                {selectedLanguageData.recentActivity.map(activity => (
+                  <li key={activity.id} className="activity-item">
+                    <div className="activity-description">{activity.description}</div>
+                    <div className="activity-meta">
+                      <span className="activity-date">{activity.date}</span>
+                      {activity.score && <span className="activity-score">{activity.score}</span>}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No recent activity for {selectedLanguageData.name}.</p>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 };
