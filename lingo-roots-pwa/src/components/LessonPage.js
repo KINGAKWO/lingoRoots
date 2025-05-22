@@ -1,28 +1,42 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
+import { getFunctions, httpsCallable } from 'firebase/functions'; // Import Firebase Functions
+import { db, auth } from '../firebase'; // Assuming auth is exported for userId
+import Quiz from './Quiz'; // Your Quiz component
 import VocabularyList from './VocabularyList';
-import Quiz from './Quiz'; // Assuming Quiz component is suitable
-import './LessonPage.css'; // CSS for overall page styling
 // Icons could be imported from a library like lucide-react if used consistently
 // import { ArrowLeft, ArrowRight, Volume2 } from 'lucide-react';
 
-const LessonPage = ({ userId }) => {
+const LessonPage = () => {
   const { languageId, lessonId } = useParams();
   const navigate = useNavigate();
-
   const [lesson, setLesson] = useState(null);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [quizUserAnswers, setQuizUserAnswers] = useState({}); // Added for quiz answers
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [quizUserAnswers, setQuizUserAnswers] = useState({});
+  const [userId, setUserId] = useState(null);
+
+  // Get Firebase Functions instance
+  const functionsInstance = getFunctions(); // Correct way to get instance
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(user => {
+      if (user) {
+        setUserId(user.uid);
+      } else {
+        setUserId(null);
+        // navigate('/signin'); // Or handle unauthenticated state
+      }
+    });
+    return () => unsubscribe();
+  }, [navigate]);
+
 
   useEffect(() => {
     const fetchLesson = async () => {
       if (!languageId || !lessonId) {
-        setError('Language ID or Lesson ID is missing.');
-        setLoading(false);
         return;
       }
       setLoading(true);
