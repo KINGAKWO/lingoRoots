@@ -4,8 +4,8 @@ import { auth } from './firebase'; // Import auth from your firebase.js
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { FaBars, FaTimes } from 'react-icons/fa'; // Import hamburger and close icons
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
-import SignUp from './components/SignUp';
-import SignIn from './components/SignIn';
+import SignUp from './pages/SignUp';
+import SignIn from './pages/SignIn';
 import LanguageDashboard from './components/LanguageDashboards';
 import Dashboard from './components/Dashboard'; // Import Dashboard component
 import LandingPage from './components/LandingPage/LandingPage'; // Import LandingPage component
