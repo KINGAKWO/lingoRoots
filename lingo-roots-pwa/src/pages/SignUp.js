@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom'; // Import Link
 import toast from 'react-hot-toast'; // Import toast
+// import { createUserDocument } from '../services/firestoreService'; // Removed import, AuthContext handles this
 // import './SignUp.css'; // Removed CSS import
 
 const SignUp = () => {
@@ -38,9 +39,13 @@ const SignUp = () => {
         primaryLanguageInterest: primaryLanguage,
         displayName: `${firstName} ${lastName}` // Add displayName
       };
-      await signup(email, password, 'learner', additionalData); // Explicitly pass 'learner'
+      // Pass additionalData to signup. AuthContext's signup now handles Firestore document creation.
+      await signup(email, password, 'learner', additionalData);
+      
+      // Firestore document creation is handled within AuthContext's signup method.
       toast.success("Account created successfully! Redirecting...");
-      console.log("User signed up successfully with role: learner");
+      console.log("User signed up successfully. Firestore document managed by AuthContext.");
+      
       // Navigation is now primarily handled by App.js based on AuthContext state changes
       // navigate('/'); // Or let App.js handle redirect based on role
     } catch (error) {
