@@ -54,7 +54,8 @@ describe('SignUp Component', () => {
     fireEvent.change(screen.getByLabelText(/email address/i), { target: { value: formData.email } });
     fireEvent.change(screen.getByLabelText(/^password/i), { target: { value: formData.password } });
     fireEvent.change(screen.getByLabelText(/primary language interest/i), { target: { value: formData.primaryLanguage } });
-    fireEvent.change(screen.getByLabelText(/select your role/i), { target: { value: formData.role } });
+    // Role selection is removed, defaults to 'learner' in AuthContext
+    // fireEvent.change(screen.getByLabelText(/select your role/i), { target: { value: formData.role } }); 
     if (formData.agreedToTerms) {
       fireEvent.click(screen.getByLabelText(/i agree to the/i));
     }
@@ -67,7 +68,7 @@ describe('SignUp Component', () => {
     expect(screen.getByLabelText(/email address/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^password/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/primary language interest/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/select your role/i)).toBeInTheDocument();
+    // expect(screen.getByLabelText(/select your role/i)).toBeInTheDocument(); // Role field removed
     expect(screen.getByLabelText(/i agree to the/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /create account/i })).toBeInTheDocument(); // Assuming button text is 'Create Account'
     expect(screen.getByText(/already have an account\?/i)).toBeInTheDocument();
@@ -82,7 +83,7 @@ describe('SignUp Component', () => {
     expect(screen.getByLabelText(/email address/i).value).toBe('test@example.com');
     expect(screen.getByLabelText(/^password/i).value).toBe('password123');
     expect(screen.getByLabelText(/primary language interest/i).value).toBe('Duala');
-    expect(screen.getByLabelText(/select your role/i).value).toBe('Learner');
+    // expect(screen.getByLabelText(/select your role/i).value).toBe('Learner'); // Role field removed
     expect(screen.getByLabelText(/i agree to the/i).checked).toBe(true);
   });
 
@@ -95,7 +96,7 @@ describe('SignUp Component', () => {
       expect(mockSignup).toHaveBeenCalledWith(
         'test@example.com',
         'password123',
-        'Learner',
+        'learner', // Role is hardcoded to 'learner' in SignUp.js
         {
           firstName: 'Test',
           lastName: 'User',

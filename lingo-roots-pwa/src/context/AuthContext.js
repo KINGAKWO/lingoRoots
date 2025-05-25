@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { auth, db } from '../services/firebase'; // Corrected import path
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, getIdTokenResult } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 
 const AuthContext = createContext();
@@ -14,15 +14,22 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState(null);
 
-  async function signup(email, password, role = 'Learner', additionalData = {}) {
+  async function signup(email, password, role = 'learner', additionalData = {}) { // Ensure role defaults to 'learner'
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    await setDoc(doc(db, 'users', userCredential.user.uid), {
-      uid: userCredential.user.uid, // Added uid field
+    const userDocData = {
+      uid: userCredential.user.uid,
       email: userCredential.user.email,
-      role: role, // Uses the role passed from SignUp, defaults to 'Learner'
-      createdAt: serverTimestamp(), // Changed to serverTimestamp
-      ...additionalData, // Spread additional data here
-    });
+      displayName: additionalData.displayName || `${additionalData.firstName} ${additionalData.lastName}` || userCredential.user.email, // Ensure displayName is set
+      role: role, // Default role is 'learner'
+      createdAt: serverTimestamp(),
+    };
+    // Add other fields from additionalData, but exclude ones already set or not part of the core user schema
+    const { firstName, lastName, primaryLanguageInterest, ...otherData } = additionalData;
+    if (firstName) userDocData.firstName = firstName;
+    if (lastName) userDocData.lastName = lastName;
+    if (primaryLanguageInterest) userDocData.primaryLanguageInterest = primaryLanguageInterest;
+
+    await setDoc(doc(db, 'users', userCredential.user.uid), { ...userDocData, ...otherData });
     // No need to manually set currentUser and userRole here, onAuthStateChanged will handle it
     return userCredential;
   }
@@ -40,16 +47,28 @@ export function AuthProvider({ children }) {
       setCurrentUser(user);
       if (user) {
         try {
-          const userDocRef = doc(db, 'users', user.uid);
-          const userDocSnap = await getDoc(userDocRef);
-          if (userDocSnap.exists()) {
-            setUserRole(userDocSnap.data().role);
+          // Prioritize custom claims for role
+          const idTokenResult = await getIdTokenResult(user);
+          const claimsRole = idTokenResult.claims.role;
+
+          if (claimsRole) {
+            setUserRole(claimsRole);
+            // Optionally, update Firestore if claims are canonical and Firestore is a mirror
+            // const userDocRef = doc(db, 'users', user.uid);
+            // await setDoc(userDocRef, { role: claimsRole }, { merge: true });
           } else {
-            console.log("No such user document!");
-            setUserRole(null); // Or handle as an error
+            // Fallback to Firestore if no role claim is present
+            const userDocRef = doc(db, 'users', user.uid);
+            const userDocSnap = await getDoc(userDocRef);
+            if (userDocSnap.exists()) {
+              setUserRole(userDocSnap.data().role);
+            } else {
+              console.warn("No user document found in Firestore for UID:", user.uid);
+              setUserRole(null); // Or a default/guest role
+            }
           }
         } catch (error) {
-          console.error("Error fetching user role:", error);
+          console.error("Error fetching user role or claims:", error);
           setUserRole(null);
         }
       } else {

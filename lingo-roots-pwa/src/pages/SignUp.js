@@ -9,7 +9,7 @@ const SignUp = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [primaryLanguage, setPrimaryLanguage] = useState('');
-  const [role, setRole] = useState('Learner');
+  // const [role, setRole] = useState('learner'); // Role is defaulted to 'learner' in AuthContext
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [error, setError] = useState(null);
   const { signup } = useAuth();
@@ -35,8 +35,8 @@ const SignUp = () => {
         primaryLanguageInterest: primaryLanguage,
         displayName: `${firstName} ${lastName}` // Add displayName
       };
-      await signup(email, password, role, additionalData);
-      console.log("User signed up successfully with role:", role);
+      await signup(email, password, 'learner', additionalData); // Explicitly pass 'learner'
+      console.log("User signed up successfully with role: learner");
       // Navigation is now primarily handled by App.js based on AuthContext state changes
       // navigate('/'); // Or let App.js handle redirect based on role
     } catch (error) {
@@ -161,23 +161,6 @@ const SignUp = () => {
             <p className="mt-1 text-xs text-gray-500">Your learning experience will be tailored to this language.</p>
           </div>
 
-          <div>
-            <label htmlFor="role" className="block text-sm font-medium text-gray-700">
-              Select Your Role
-            </label>
-            <select
-              id="role"
-              name="role"
-              required
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="mt-1 block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-marine-blue-500 focus:border-marine-blue-500 sm:text-sm rounded-md"
-            >
-              <option value="Learner">Learner</option>
-              <option value="Content Creator">Content Creator</option>
-              <option value="Administrator">Administrator</option>
-            </select>
-          </div>
 
           <div className="flex items-start">
             <div className="flex items-center h-5">
