@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { auth, db } from '../firebase'; // Import auth and db from your firebase.js file
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore"; // Import Firestore functions
+import { useAuth } from '../context/AuthContext'; // Import useAuth
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for redirection
 import './SignUp.css'; // Import the new CSS file
 // Assuming you have an icon, otherwise remove or replace path
-// import logoIcon from './path-to-your-logo-icon.svg'; 
+// import logoIcon from './path-to-your-logo-icon.svg';  
 
 const SignUp = () => {
   const [firstName, setFirstName] = useState('');
@@ -12,8 +11,11 @@ const SignUp = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [primaryLanguage, setPrimaryLanguage] = useState('');
+  const [role, setRole] = useState('Learner'); // Add role state, default to Learner
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [error, setError] = useState(null);
+  const { signup } = useAuth(); // Get signup function from context
+  const navigate = useNavigate(); // For redirection
 
   const handleSignUp = async (event) => {
     event.preventDefault();
@@ -25,22 +27,23 @@ const SignUp = () => {
     }
 
     try {
-      // Here, you would typically also send firstName, lastName, and primaryLanguage
-      // to your backend (e.g., Firestore) after successful Firebase Auth user creation.
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      console.log("User signed up:", userCredential.user);
-
-      // Save additional user details to Firestore
-      await setDoc(doc(db, "users", userCredential.user.uid), {
-        firstName: firstName,
-        lastName: lastName,
-        email: email, // Storing email from auth is also good practice
+      const additionalData = {
+        firstName,
+        lastName,
         primaryLanguageInterest: primaryLanguage,
-        createdAt: new Date() // Optional: timestamp for when the user signed up
-      });
-      console.log("Additional user data saved to Firestore");
-
-      // You can redirect or update UI here
+      };
+      await signup(email, password, role, additionalData);
+      console.log("User signed up successfully with role:", role);
+      // Redirect based on role after signup
+      if (role === 'Learner') {
+        navigate('/learn');
+      } else if (role === 'Content Creator') {
+        navigate('/creator-dashboard');
+      } else if (role === 'Administrator') {
+        navigate('/admin');
+      } else {
+        navigate('/'); // Fallback redirect
+      }
     } catch (error) {
       console.error("Error signing up:", error);
       setError(error.message);
@@ -127,6 +130,21 @@ const SignUp = () => {
               {/* ... more languages */}
             </select>
             <p className="field-description">Your learning experience will be tailored to this language</p>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="role">Select Role</label>
+            <select 
+              id="role" 
+              value={role} 
+              onChange={(e) => setRole(e.target.value)}
+              required
+              className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            >
+              <option value="Learner">Learner</option>
+              <option value="Content Creator">Content Creator</option>
+              <option value="Administrator">Administrator</option>
+            </select>
           </div>
 
           <div className="checkbox-group">
