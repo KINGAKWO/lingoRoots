@@ -1,61 +1,56 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { auth, db } from '../firebase'; // Assuming firebase.js is in src/firebase.js
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged
-} from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { auth, db } from '../services/firebase'; // Corrected import path
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
+import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 
 const AuthContext = createContext();
 
-export const useAuth = () => {
+export function useAuth() {
   return useContext(AuthContext);
-};
+}
 
-export const AuthProvider = ({ children }) => {
+export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
-  const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState(null);
 
-  const signup = async (email, password, role, additionalData) => {
+  async function signup(email, password, role = 'Learner', additionalData = {}) {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-    // Store user role and additional data in Firestore
-    await setDoc(doc(db, 'users', user.uid), {
-      email: user.email,
-      role: role,
-      ...additionalData,
-      createdAt: new Date(),
+    await setDoc(doc(db, 'users', userCredential.user.uid), {
+      uid: userCredential.user.uid, // Added uid field
+      email: userCredential.user.email,
+      role: role, // Uses the role passed from SignUp, defaults to 'Learner'
+      createdAt: serverTimestamp(), // Changed to serverTimestamp
+      ...additionalData, // Spread additional data here
     });
-    // It's good practice to fetch the role again or set it directly
-    // For simplicity, we'll rely on the next onAuthStateChanged to fetch it
+    // No need to manually set currentUser and userRole here, onAuthStateChanged will handle it
     return userCredential;
-  };
+  }
 
-  const signin = (email, password) => {
+  async function login(email, password) {
     return signInWithEmailAndPassword(auth, email, password);
-  };
+  }
 
-  const signout = () => {
-    setUserRole(null); // Clear role on signout
+  function logout() {
     return signOut(auth);
-  };
+  }
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
       if (user) {
-        // Fetch user role from Firestore
-        const userDocRef = doc(db, 'users', user.uid);
-        const userDocSnap = await getDoc(userDocRef);
-        if (userDocSnap.exists()) {
-          setUserRole(userDocSnap.data().role);
-        } else {
-          // Handle case where user doc might not exist yet or role is not set
-          console.warn('User document or role not found in Firestore for UID:', user.uid);
-          setUserRole(null); // Or a default role
+        try {
+          const userDocRef = doc(db, 'users', user.uid);
+          const userDocSnap = await getDoc(userDocRef);
+          if (userDocSnap.exists()) {
+            setUserRole(userDocSnap.data().role);
+          } else {
+            console.log("No such user document!");
+            setUserRole(null); // Or handle as an error
+          }
+        } catch (error) {
+          console.error("Error fetching user role:", error);
+          setUserRole(null);
         }
       } else {
         setUserRole(null);
@@ -67,11 +62,11 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const value = {
-    currentUser,
-    userRole,
+    user: currentUser,
+    role: userRole,
     signup,
-    signin,
-    signout,
+    login,
+    logout,
     loading
   };
 
@@ -80,4 +75,4 @@ export const AuthProvider = ({ children }) => {
       {!loading && children}
     </AuthContext.Provider>
   );
-};
+}

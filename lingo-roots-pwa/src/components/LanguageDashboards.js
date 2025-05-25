@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../firebase'; // Import Firestore instance
+import { db } from '../services/firebase'; // Import Firestore instance
 import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import LessonList from './LessonList'; // We'll create this next
 

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'; // Import useNavigate
 // VocabularyList and Quiz are now part of LessonPage
 // import VocabularyList from './VocabularyList'; 
 // import Quiz from './Quiz'; 
-import { db } from '../firebase'; 
+import { db } from '../services/firebase'; 
 import { doc, getDoc } from "firebase/firestore"; 
 
 

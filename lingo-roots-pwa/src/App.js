@@ -1,100 +1,88 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import './App.css';
-import { auth } from './firebase'; // Import auth from your firebase.js
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { FaBars, FaTimes } from 'react-icons/fa'; // Import hamburger and close icons
-import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import MainLayout from './layouts/MainLayout';
+
+// Page Components
 import SignUp from './pages/SignUp';
 import SignIn from './pages/SignIn';
+import LandingPage from './components/LandingPage/LandingPage';
+import AboutPage from './components/AboutPage';
 import LanguageDashboard from './components/LanguageDashboards';
-import Dashboard from './components/Dashboard'; // Import Dashboard component
-import LandingPage from './components/LandingPage/LandingPage'; // Import LandingPage component
-import AboutPage from './components/AboutPage'; // Import AboutPage component
-import LessonPage from './components/LessonPage'; // Import LessonPage component
+import LessonPage from './components/LessonPage';
+import LanguageSelector from './components/LanguageSelector';
+import ProtectedRoute from './components/ProtectedRoute';
 
-function App() {
-  const [currentUser, setCurrentUser] = useState(null);
-  const [loading, setLoading] = useState(true); // To handle initial auth state check
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+// Role-specific pages
+import LearnPage from './pages/LearnPage';
+import CreatorDashboardPage from './pages/CreatorDashboardPage';
+import AdminPage from './pages/AdminPage';
+import AdminDashboard from './pages/AdminDashboard';
+import ModuleUploader from './pages/ModuleUploader';
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-      setLoading(false); // Auth state determined
-      console.log("Auth state changed, user:", user);
-    });
-
-    // Cleanup subscription on unmount
-    return () => unsubscribe();
-  }, []);
-
-  const handleSignOut = async () => {
-    try {
-      await signOut(auth);
-      console.log("User signed out");
-      // Navigate to sign-in or home page after sign out is handled by Navigate component below
-    } catch (error) {
-      console.error("Error signing out:", error);
-    }
-  };
+function AppRoutes() {
+  const { currentUser, userRole, loading } = useAuth();
 
   if (loading) {
-    return <p>Loading...</p>; // Or a spinner component
+    return (
+      <div className="flex justify-center items-center min-h-screen App-bg">
+        <p className="text-center text-xl font-semibold text-gray-700">Loading LingoRoots...</p>
+        {/* Placeholder for a spinner */}
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-marine-blue-500 ml-4"></div>
+      </div>
+    );
+  }
+
+  let defaultAuthenticatedPath = "/";
+  if (currentUser) {
+    if (userRole === 'Learner') defaultAuthenticatedPath = '/learn';
+    else if (userRole === 'Content Creator') defaultAuthenticatedPath = '/creator-dashboard';
+    else if (userRole === 'Administrator') defaultAuthenticatedPath = '/admin';
+    else defaultAuthenticatedPath = '/select-language'; 
   }
 
   return (
+    <Routes>
+      <Route path="/" element={currentUser ? <Navigate to={defaultAuthenticatedPath} replace /> : <LandingPage />} />
+      <Route path="/signin" element={currentUser ? <Navigate to={defaultAuthenticatedPath} replace /> : <SignIn />} />
+      <Route path="/signup" element={currentUser ? <Navigate to={defaultAuthenticatedPath} replace /> : <SignUp />} />
+      <Route path="/about" element={<AboutPage />} />
+
+      <Route element={<ProtectedRoute />}>
+        <Route path="/select-language" element={<LanguageSelector />} />
+        <Route path="/lessons" element={<LanguageDashboard />} />
+        <Route path="/lessons/:languageId/:lessonId" element={<LessonPage />} />
+      </Route>
+
+      <Route element={<ProtectedRoute allowedRoles={['Learner']} />}>
+        <Route path="/learn" element={<LearnPage />} />
+      </Route>
+
+      <Route element={<ProtectedRoute allowedRoles={['Content Creator', 'Administrator']} />}>
+        <Route path="/creator-dashboard" element={<CreatorDashboardPage />} />
+        <Route path="/module-uploader" element={<ModuleUploader />} />
+      </Route>
+
+      <Route element={<ProtectedRoute allowedRoles={['Administrator']} />}>
+        <Route path="/admin" element={<AdminPage />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+      </Route>
+      
+      {currentUser && <Route path="/*" element={<Navigate to={defaultAuthenticatedPath} replace />} />}
+      {!currentUser && <Route path="/*" element={<Navigate to="/" replace />} />}
+    </Routes>
+  );
+}
+
+function App() {
+  return (
     <Router>
-      <div className="App">
-        <header className="App-header">
-          <Link to={currentUser ? "/dashboard" : "/"} className="app-logo-link"> {/* Added class for specific styling if needed */}
-            <h1>LingoRoots</h1>
-          </Link>
-          {currentUser && (
-            <div className="mobile-menu-icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-              {isMobileMenuOpen ? <FaTimes /> : <FaBars />}
-            </div>
-          )}
-          {currentUser && (
-            <nav className={`main-navigation ${isMobileMenuOpen ? 'mobile-active' : ''}`}> {/* Changed class, removed inline style */}
-              <Link to="/" className="nav-link">Home</Link> {/* Corrected Home link to point to / */}
-              <Link to="/dashboard" className="nav-link">Dashboard</Link>
-              <Link to="/lessons" className="nav-link">Languages</Link>
-              <Link to="/about" className="nav-link">About</Link> {/* Added About link, assumes /about route will be handled */}
-              <Link to="/profile" className="nav-link">Profile</Link>
-              <button onClick={handleSignOut} className="nav-link signout-btn">
-                {/* Icon can be added here e.g. <FaSignOutAlt /> */}
-                Sign Out
-              </button>
-              {/* <p className="user-email-display">Logged in as: {currentUser.email}</p> */}
-              {/* Ensure mobile menu closes on link click if desired by adding onClick={() => setIsMobileMenuOpen(false)} to each Link */}
-            </nav>
-          )}
-        </header>
-        
-        <main>
-          <Routes>
-            {currentUser ? (
-              <>
-                <Route path="/dashboard" element={<Dashboard userId={currentUser.uid} />} />
-                <Route path="/lessons" element={<LanguageDashboard userId={currentUser.uid} />} />
-                <Route path="/lessons/:languageId/:lessonId" element={<LessonPage userId={currentUser.uid} />} /> {/* Route for individual lessons, passing userId */}
-                <Route path="/about" element={<AboutPage />} /> {/* Added route for AboutPage */}
-                {/* Add routes for Quiz, Culture pages here */}
-                {/* Default route for logged-in users */}
-                <Route path="/*" element={<Navigate to="/dashboard" replace />} />
-              </>
-            ) : (
-              <>
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/signin" element={<SignIn />} />
-                <Route path="/signup" element={<SignUp />} />
-                {/* Default route for non-logged-in users, if no other match, show landing */}
-                <Route path="/*" element={<Navigate to="/" replace />} />
-              </>
-            )}
-          </Routes>
-        </main>
-      </div>
+      <AuthProvider>
+        <MainLayout>
+          <AppRoutes />
+        </MainLayout>
+      </AuthProvider>
     </Router>
   );
 }

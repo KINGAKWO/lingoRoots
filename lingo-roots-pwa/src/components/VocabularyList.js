@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { db, storage as firebaseStorage } from '../firebase'; // Import Firestore and Storage
+import { db, storage as firebaseStorage } from '../services/firebase'; // Import Firestore and Storage
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { ref, getDownloadURL } from "firebase/storage";
 
@@ -17,6 +17,8 @@ const VocabularyList = ({ words, languageId }) => { // Changed props: lessonId r
       }
       setLoadingAudio(true);
       const urls = {};
+      let audioPath; // Declare audioPath here to be accessible in catch block
+
       for (const item of words) {
         // Ensure item.id is unique and item.audioUrl exists
         // The audioUrl in Firestore should be the full path like 'languages/duala/audio/mbote.mp3'
@@ -32,7 +34,7 @@ const VocabularyList = ({ words, languageId }) => { // Changed props: lessonId r
             // const audioRef = ref(firebaseStorage, item.audio); // Old line
             // urls[item.id] = await getDownloadURL(audioRef); // Old line
 
-            let audioPath;
+            // let audioPath; // Moved declaration up
             if (item.audio.startsWith('gs://')) {
               audioPath = item.audio; // Already a full gs:// URL
             } else if (item.audio.includes('/')) {

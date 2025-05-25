@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions'; // Import Firebase Functions
-import { db, auth } from '../firebase'; // Assuming auth is exported for userId
+import { db, auth } from '../services/firebase'; // Assuming auth is exported for userId
 import Quiz from './Quiz'; // Your Quiz component
 import VocabularyList from './VocabularyList';
 // Icons could be imported from a library like lucide-react if used consistently

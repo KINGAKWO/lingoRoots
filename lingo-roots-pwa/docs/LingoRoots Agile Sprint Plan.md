@@ -1,0 +1,86 @@
+## LingoRoots Agile Sprint Plan
+### Sprint 1: Foundation & Core Authentication
+- Goal: Establish the project skeleton, basic UI (mobile-first adhering to `project_rules.md` styling guidelines), and core authentication for all user types (initial registration as Learner).
+- User Stories/Features Mapped:
+  - Auth: User Sign-up (Email/Password) - Default role: learner (Ref: `Firebase Auth & RBAC.md` )
+  - Auth: User Login (Email/Password) (Ref: `Firebase Auth & RBAC.md` )
+  - Tech Story: Setup Firebase project (Auth, Firestore) and basic Firestore structure for users collection (Ref: `LingoRoots_PRD.md` , `Firebase Auth & RBAC.md` ).
+  - Tech Story: Implement basic responsive layout (Header, Footer, Main Content area) using Tailwind CSS (Ref: `project_rules.md` ).
+  - Tech Story: Setup project structure ( /src folders: components , pages , layouts , services , context , assets , utils ) (Ref: `project_rules.md` ).
+  - Tech Story: Create AuthContext for managing user authentication state (Ref: `Firebase Auth & RBAC.md` ).
+- Component Dependencies:
+  - LayoutComponent (Organism)
+  - SignUpForm , LoginForm (Molecules)
+  - Basic UI Atoms (e.g., Button , Input , Label - as per Atomic Design in `project_rules.md` )
+  - AuthContext (Context)
+- Testing Priorities:
+  - Unit tests for Sign-up and Login form validation and submission logic (Jest).
+  - Integration tests for Firebase Authentication flow (Emulator Suite).
+  - Firestore user document creation upon sign-up.
+  - Basic UI responsiveness on common screen sizes.
+### Sprint 2: Learner Core Experience - Content Consumption & Engagement
+- Goal: Enable Learners to select languages, access and interact with lessons, quizzes, and flashcards, and view basic progress.
+- User Stories/Features Mapped:
+  - Learner: Choose language(s) to learn.
+  - Learner: View available lessons for the chosen language(s) (Read access from languages/{langId}/lessons/{lessonId} ).
+  - Learner: Take quizzes associated with lessons (Read access from languages/{langId}/quizzes/{quizId} ).
+  - Learner: Use flashcards for vocabulary practice (assuming flashcard data is part of lesson/quiz structure or a new collection).
+  - Learner: Track basic progress (e.g., completed lessons/quizzes, stored in users/{userId}/userProgress/ ).
+- Component Dependencies:
+  - LanguageSelectionPage (Page)
+  - LessonListPage , LessonViewComponent (Organisms/Molecules)
+  - QuizViewComponent , QuestionComponent (Organisms/Molecules)
+  - FlashcardTrainerComponent (Organism)
+  - UserProfilePage (displaying basic progress) (Page/Organism)
+  - ProtectedRoute component for Learner-specific routes (Ref: `Firebase Auth & RBAC.md` ).
+- Testing Priorities:
+  - Fetching and displaying lesson and quiz data (React Testing Library).
+  - Quiz submission logic and basic scoring.
+  - Flashcard interaction and data flow.
+  - Firestore updates for progress tracking.
+  - Security rules for Learner read access to content (Emulator Suite).
+### Sprint 3: Content Creator Capabilities - CMS
+- Goal: Empower Content Creators to create, update, and manage lessons and quizzes through a dedicated Content Management System (CMS).
+- User Stories/Features Mapped:
+  - Content Creator: Access a CMS dashboard.
+  - Content Creator: Create new lessons (including text, and potentially placeholders for images/audio to be stored in Firebase Storage).
+  - Content Creator: Edit existing lessons.
+  - Content Creator: Create new quizzes with various question types.
+  - Content Creator: Edit existing quizzes.
+  - Tech Story: Implement Firestore security rules for content creation/modification by contentCreator role (Ref: `Firebase Auth & RBAC.md` ).
+- Component Dependencies:
+  - CMSLayout (Layout)
+  - LessonEditorForm , QuizEditorForm (Organisms)
+  - ContentManagementTable (for listing lessons/quizzes in CMS) (Organism)
+  - FileUploadComponent (if handling direct uploads for assets, though initially might be links) (Molecule)
+  - ProtectedRoute component for contentCreator role.
+- Testing Priorities:
+  - CMS form submissions, data validation, and data persistence to Firestore (Jest, React Testing Library, Emulator Suite).
+  - Lesson/quiz creation and update flows.
+  - Security rules ensuring only authenticated contentCreator or admin roles can write to content collections (Emulator Suite).
+  - Role-based access to CMS sections.
+### Sprint 4: Admin Functions, Polish & Deployment Prep
+- Goal: Implement administrative functionalities for user and content management, conduct thorough testing across all roles, refine UI/UX, and prepare for initial deployment.
+- User Stories/Features Mapped:
+  - Admin: Access an Admin dashboard.
+  - Admin: View a list of all users and their roles.
+  - Admin: Change a user's role (e.g., promote Learner to Content Creator, or assign Admin) (Ref: `Firebase Auth & RBAC.md` - using Admin SDK/Custom Claims).
+  - Admin: Manage content (e.g., view all, potentially delete or approve content).
+  - Admin: Manage available languages in the app (e.g., add new language categories).
+  - Tech Story: Refine all Firestore security rules for robustness and comprehensive coverage (Ref: `project_rules.md` ).
+  - Tech Story: Conduct end-to-end testing for all user role flows.
+  - Tech Story: Setup CI/CD pipeline for Firebase hosting (Ref: `project_rules.md` ).
+- Component Dependencies:
+  - AdminDashboardLayout (Layout)
+  - UserManagementTable , UserRoleEditForm (Organisms/Molecules)
+  - ContentModerationInterface (Organism)
+  - LanguageManagementInterface (Organism)
+  - ProtectedRoute component for admin role.
+- Testing Priorities:
+  - Admin user role promotion/demotion functionality (manual and automated if possible).
+  - Admin content management actions (view, delete).
+  - Comprehensive security rule testing using Firebase Emulator Suite for all roles and edge cases.
+  - End-to-end user flows for Learner, Content Creator, and Admin.
+  - Accessibility checks (WCAG 2.1 compliance as per `project_rules.md` ).
+  - Test deployment process to a staging/preview channel.
+This sprint plan provides a structured approach to developing the LingoRoots application, prioritizing foundational elements and progressively building features for each user role. Remember to adapt and refine this plan as the project evolves.

@@ -1,29 +1,17 @@
-# Software Requirements Specification (SRS)
+# Product Requirements Document (PRD)
 
-## Functional Requirements
+## Overview
+The application is an interactive web platform to help users learn their native languages, starting with Duala and Bassa, and scaling to 10 languages. It uses React for frontend and Firebase (Authentication, Firestore, Functions, Hosting) for backend.
 
-### Learners
-- Register/login with email and password.
-- Access lessons with vocabulary, cultural tips, and videos.
-- Take quizzes and receive scores.
-- View progress dashboard.
+## Key Features
+- Lessons with vocabulary, dialogues, cultural tips, and YouTube videos.
+- Gamified quizzes (MCQ, fill-in-the-blank, matching).
+- Progress tracking, badges, streaks.
+- Offline support for viewing lessons and syncing progress.
+- Content Management System (CMS) for Content Creators and Admins.
+- Role-based access control.
 
-### Content Creators
-- Login to CMS.
-- Add/edit/delete lessons and quizzes.
-- Embed YouTube videos.
-- Manage existing content (not languages).
-
-### Administrators
-- Full CMS access plus user and language management.
-
-## Non-Functional Requirements
-- Responsive UI (mobile/tablet/desktop)
-- Offline access for selected content
-- Authentication via Firebase Auth
-- Real-time data using Firestore
-- Hosting with Firebase Hosting
-
-## System Constraints
-- Initial support for Duala and Bassa
-- Estimated user base: ~200 in the first year
+## User Roles
+- **Learners**: Register/login, browse lessons, take quizzes, track progress.
+- **Content Creators**: Manage lesson content through CMS.
+- **Administrators**: Full control, including user and language management.

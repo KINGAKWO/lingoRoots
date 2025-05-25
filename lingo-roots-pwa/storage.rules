@@ -1,0 +1,40 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Default deny all access to prevent unauthorized access
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+
+    // Allow admins to read/write/delete anything in storage
+    match /{allPaths=**} {
+      allow read, write: if request.auth != null &&
+                          firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Content Creators can upload to their own user-specific folder
+    // e.g., /users/{userId}/images/image.jpg or /users/{userId}/audio/audio.mp3
+    match /users/{userId}/{allPaths=**} {
+      allow read: if request.auth != null; // Allow any authenticated user to read (e.g. profile pictures, shared content)
+      allow write: if request.auth != null && request.auth.uid == userId &&
+                     firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'contentCreator';
+    }
+
+    // Public read access for general assets like language learning materials (e.g. images/audio in a shared folder)
+    // This is an example, adjust the path as per your application's structure for public content
+    match /public-content/{allPaths=**} {
+        allow read: if true; // Anyone can read from this path
+    }
+
+    // Learners can read content from specific paths if needed (e.g., shared lesson materials)
+    // This rule assumes content is structured in a way that learners need to access it directly.
+    // Often, content is served via URLs obtained from Firestore, not direct Storage access by learners.
+    // Example: allow learners to read from a common 'lessons' folder.
+    match /lessons-media/{allPaths=**} {
+        allow read: if request.auth != null && 
+                       (firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'learner' ||
+                        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'contentCreator' ||
+                        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin');
+    }
+  }
+}

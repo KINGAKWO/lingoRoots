@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../firebase'; // Import Firestore instance
+import { db } from '../services/firebase'; // Import Firestore instance
 import { doc, getDoc } from 'firebase/firestore';
 import { Link } from 'react-router-dom';
 import './Dashboard.css'; // Import the CSS file

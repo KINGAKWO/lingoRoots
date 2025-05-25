@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom'; // Import Link for navigation
 import './LandingPage.css';
-import { db } from '../../firebase'; // Import Firestore instance
+import { db } from '../../services/firebase'; // Import Firestore instance
 import { collection, getDocs, query } from 'firebase/firestore'; // Import Firestore functions
 // Placeholder icons - replace with actual SVGs or a library like react-icons
 import { FaGlobeAfrica, FaUserGraduate, FaLaptopCode, FaHeadphonesAlt, FaComments, FaLanguage, FaChalkboardTeacher, FaBars, FaTimes } from 'react-icons/fa'; // Added FaBars and FaTimes 

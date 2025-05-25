@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext'; // Import useAuth
-import { useNavigate } from 'react-router-dom'; // Import useNavigate for redirection
-import './SignUp.css'; // Import the new CSS file
-// Assuming you have an icon, otherwise remove or replace path
-// import logoIcon from './path-to-your-logo-icon.svg';  
+import { useAuth } from '../context/AuthContext';
+import { useNavigate, Link } from 'react-router-dom'; // Import Link
+// import './SignUp.css'; // Removed CSS import
 
 const SignUp = () => {
   const [firstName, setFirstName] = useState('');
@@ -11,18 +9,22 @@ const SignUp = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [primaryLanguage, setPrimaryLanguage] = useState('');
-  const [role, setRole] = useState('Learner'); // Add role state, default to Learner
+  const [role, setRole] = useState('Learner');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [error, setError] = useState(null);
-  const { signup } = useAuth(); // Get signup function from context
-  const navigate = useNavigate(); // For redirection
+  const { signup } = useAuth();
+  const navigate = useNavigate();
 
   const handleSignUp = async (event) => {
     event.preventDefault();
-    setError(null); // Clear previous errors
+    setError(null);
 
     if (!agreedToTerms) {
-      setError("You must agree to the terms of service, privacy policy, and data collection.");
+      setError("You must agree to the terms and conditions.");
+      return;
+    }
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long.");
       return;
     }
 
@@ -31,115 +33,145 @@ const SignUp = () => {
         firstName,
         lastName,
         primaryLanguageInterest: primaryLanguage,
+        displayName: `${firstName} ${lastName}` // Add displayName
       };
       await signup(email, password, role, additionalData);
       console.log("User signed up successfully with role:", role);
-      // Redirect based on role after signup
-      if (role === 'Learner') {
-        navigate('/learn');
-      } else if (role === 'Content Creator') {
-        navigate('/creator-dashboard');
-      } else if (role === 'Administrator') {
-        navigate('/admin');
-      } else {
-        navigate('/'); // Fallback redirect
-      }
+      // Navigation is now primarily handled by App.js based on AuthContext state changes
+      // navigate('/'); // Or let App.js handle redirect based on role
     } catch (error) {
       console.error("Error signing up:", error);
-      setError(error.message);
+      if (error.code === 'auth/email-already-in-use') {
+        setError('This email address is already in use. Please try another.');
+      } else if (error.code === 'auth/invalid-email') {
+        setError('Please enter a valid email address.');
+      } else if (error.code === 'auth/weak-password') {
+        setError('The password is too weak. Please choose a stronger password.');
+      } else {
+        setError('Failed to create an account. Please try again later.');
+      }
     }
   };
 
   return (
-    <div className="signup-container">
-      <div className="signup-form-wrapper">
-        <div className="signup-logo">
-          {/* <img src={logoIcon} alt="LinguaRoots Logo" /> */}
-          <span>LinguaRoots</span>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-lg w-full space-y-8 bg-white p-10 rounded-xl shadow-lg">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-marine-blue-700">LingoRoots</h1>
+          <h2 className="mt-4 text-2xl font-extrabold text-gray-900">
+            Create your account
+          </h2>
+          <p className="mt-2 text-sm text-gray-600">
+            Join the community and start your language learning journey!
+          </p>
         </div>
-        <h2>Create your account</h2>
-        <p className="sub-heading">Join the community and start learning</p>
-
-        <form onSubmit={handleSignUp} className="signup-form">
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="firstName">First name</label>
+        <form onSubmit={handleSignUp} className="mt-8 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
+                First name
+              </label>
               <input
-                type="text"
                 id="firstName"
+                name="firstName"
+                type="text"
+                autoComplete="given-name"
+                required
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
+                className="mt-1 appearance-none block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-marine-blue-500 focus:border-marine-blue-500 sm:text-sm"
                 placeholder="John"
-                required
               />
             </div>
-            <div className="form-group">
-              <label htmlFor="lastName">Last name</label>
+            <div>
+              <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
+                Last name
+              </label>
               <input
-                type="text"
                 id="lastName"
+                name="lastName"
+                type="text"
+                autoComplete="family-name"
+                required
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
+                className="mt-1 appearance-none block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-marine-blue-500 focus:border-marine-blue-500 sm:text-sm"
                 placeholder="Doe"
-                required
               />
             </div>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              Email address
+            </label>
             <input
-              type="email"
               id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="m.davis@example.com"
-              required
+              className="mt-1 appearance-none block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-marine-blue-500 focus:border-marine-blue-500 sm:text-sm"
+              placeholder="you@example.com"
             />
           </div>
 
-          <div className="form-group">
-            <div className="label-with-hint">
-              <label htmlFor="password">Password</label>
-              <span className="hint">Min. 8 characters</span>
+          <div>
+            <div className="flex justify-between">
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Password
+                </label>
+                <span className="text-xs text-gray-500">Min. 8 characters</span>
             </div>
             <input
-              type="password"
               id="password"
+              name="password"
+              type="password"
+              autoComplete="new-password"
+              required
+              minLength="8"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              minLength="8"
-              required
+              className="mt-1 appearance-none block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-marine-blue-500 focus:border-marine-blue-500 sm:text-sm"
+              placeholder="••••••••"
             />
           </div>
-
-          <div className="form-group">
-            <label htmlFor="primaryLanguage">Primary Language Interest <span title="Your learning experience will be tailored to this language" className="tooltip-icon">ⓘ</span></label>
-            <select 
-              id="primaryLanguage" 
-              value={primaryLanguage} 
-              onChange={(e) => setPrimaryLanguage(e.target.value)}
+          
+          <div>
+            <label htmlFor="primaryLanguage" className="block text-sm font-medium text-gray-700">
+              Primary Language Interest
+            </label>
+            <select
+              id="primaryLanguage"
+              name="primaryLanguage"
               required
+              value={primaryLanguage}
+              onChange={(e) => setPrimaryLanguage(e.target.value)}
+              className="mt-1 block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-marine-blue-500 focus:border-marine-blue-500 sm:text-sm rounded-md"
             >
               <option value="" disabled>Select a language</option>
-              {/* Add language options here, e.g., from a predefined list or API */}
-              <option value="fulfulde">Fulfulde</option>
-              <option value="ewondo">Ewondo</option>
-              <option value="duala">Duala</option>
-              <option value="basaa">Basaa</option>
-              {/* ... more languages */}
+              <option value="Duala">Duala</option>
+              <option value="Bassa">Bassa</option>
+              <option value="Ewondo">Ewondo</option>
+              <option value="Fulfulde">Fulfulde</option>
+              {/* Add more languages as needed */}
             </select>
-            <p className="field-description">Your learning experience will be tailored to this language</p>
+            <p className="mt-1 text-xs text-gray-500">Your learning experience will be tailored to this language.</p>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="role">Select Role</label>
-            <select 
-              id="role" 
-              value={role} 
-              onChange={(e) => setRole(e.target.value)}
+          <div>
+            <label htmlFor="role" className="block text-sm font-medium text-gray-700">
+              Select Your Role
+            </label>
+            <select
+              id="role"
+              name="role"
               required
-              className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="mt-1 block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-marine-blue-500 focus:border-marine-blue-500 sm:text-sm rounded-md"
             >
               <option value="Learner">Learner</option>
               <option value="Content Creator">Content Creator</option>
@@ -147,27 +179,55 @@ const SignUp = () => {
             </select>
           </div>
 
-          <div className="checkbox-group">
-            <input 
-              type="checkbox" 
-              id="termsAgreement" 
-              checked={agreedToTerms} 
-              onChange={(e) => setAgreedToTerms(e.target.checked)} 
-              required
-            />
-            <label htmlFor="termsAgreement">
-              I agree to the terms of service, privacy policy, and the collection of my data for learning personalization
-            </label>
+          <div className="flex items-start">
+            <div className="flex items-center h-5">
+              <input
+                id="termsAgreement"
+                name="termsAgreement"
+                type="checkbox"
+                checked={agreedToTerms}
+                onChange={(e) => setAgreedToTerms(e.target.checked)}
+                required
+                className="focus:ring-marine-blue-500 h-4 w-4 text-marine-blue-600 border-gray-300 rounded"
+              />
+            </div>
+            <div className="ml-3 text-sm">
+              <label htmlFor="termsAgreement" className="font-medium text-gray-700">
+                I agree to the{' '}
+                <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-marine-blue-600 hover:text-marine-blue-500">
+                  Terms of Service
+                </a>{' '}and{' '}
+                 <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-marine-blue-600 hover:text-marine-blue-500">
+                  Privacy Policy
+                </a>
+                .
+              </label>
+            </div>
           </div>
 
-          {error && <p className="error-message">{error}</p>}
+          {error && (
+            <p className="mt-2 text-center text-sm text-red-600">
+              {error}
+            </p>
+          )}
 
-          <button type="submit" className="btn-submit">Create account</button>
-
-          <p className="login-link">
-            Already have an account? <a href="/signin">Log in</a> {/* Adjust link as per your routing */}
-          </p>
+          <div>
+            <button
+              type="submit"
+              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-marine-blue-600 hover:bg-marine-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-marine-blue-500 transition duration-150 ease-in-out"
+            >
+              Create account
+            </button>
+          </div>
         </form>
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-600">
+            Already have an account?{' '}
+            <Link to="/signin" className="font-medium text-marine-blue-600 hover:text-marine-blue-500">
+              Log in
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
