@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom'; // Import Link
+import toast from 'react-hot-toast'; // Import toast
 // import './SignUp.css'; // Removed CSS import
 
 const SignUp = () => {
@@ -11,20 +12,22 @@ const SignUp = () => {
   const [primaryLanguage, setPrimaryLanguage] = useState('');
   // const [role, setRole] = useState('learner'); // Role is defaulted to 'learner' in AuthContext
   const [agreedToTerms, setAgreedToTerms] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(null); // Keep local error state for inline messages if needed
   const { signup } = useAuth();
   const navigate = useNavigate();
 
   const handleSignUp = async (event) => {
     event.preventDefault();
-    setError(null);
+    setError(null); // Clear previous inline errors
 
     if (!agreedToTerms) {
-      setError("You must agree to the terms and conditions.");
+      toast.error("You must agree to the terms and conditions.");
+      setError("You must agree to the terms and conditions."); // Optional: keep inline error too
       return;
     }
     if (password.length < 8) {
-      setError("Password must be at least 8 characters long.");
+      toast.error("Password must be at least 8 characters long.");
+      setError("Password must be at least 8 characters long."); // Optional: keep inline error too
       return;
     }
 
@@ -36,20 +39,22 @@ const SignUp = () => {
         displayName: `${firstName} ${lastName}` // Add displayName
       };
       await signup(email, password, 'learner', additionalData); // Explicitly pass 'learner'
+      toast.success("Account created successfully! Redirecting...");
       console.log("User signed up successfully with role: learner");
       // Navigation is now primarily handled by App.js based on AuthContext state changes
       // navigate('/'); // Or let App.js handle redirect based on role
     } catch (error) {
       console.error("Error signing up:", error);
+      let errorMessage = 'Failed to create an account. Please try again later.';
       if (error.code === 'auth/email-already-in-use') {
-        setError('This email address is already in use. Please try another.');
+        errorMessage = 'This email address is already in use. Please try another.';
       } else if (error.code === 'auth/invalid-email') {
-        setError('Please enter a valid email address.');
+        errorMessage = 'Please enter a valid email address.';
       } else if (error.code === 'auth/weak-password') {
-        setError('The password is too weak. Please choose a stronger password.');
-      } else {
-        setError('Failed to create an account. Please try again later.');
+        errorMessage = 'The password is too weak. Please choose a stronger password.';
       }
+      toast.error(errorMessage);
+      setError(errorMessage); // Optional: keep inline error too
     }
   };
 

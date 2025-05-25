@@ -3,6 +3,7 @@ import './App.css';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import MainLayout from './layouts/MainLayout';
+import { Toaster } from 'react-hot-toast'; // Import Toaster
 
 // Page Components
 import SignUp from './pages/SignUp';
@@ -79,6 +80,7 @@ function App() {
   return (
     <Router>
       <AuthProvider>
+        <Toaster position="top-center" reverseOrder={false} /> {/* Add Toaster component here */}
         <MainLayout>
           <AppRoutes />
         </MainLayout>

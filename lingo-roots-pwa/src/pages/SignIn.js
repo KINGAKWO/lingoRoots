@@ -2,32 +2,35 @@ import React, { useState } from 'react';
 // import './SignIn.css'; // Removed CSS import
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom'; // Import Link
+import toast from 'react-hot-toast'; // Import toast
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(null); // Keep local error state for inline messages if needed
   const { login } = useAuth(); // Changed to login, redirection is handled by App.js/ProtectedRoute
   const navigate = useNavigate();
 
   const handleSignIn = async (event) => {
     event.preventDefault();
-    setError(null);
+    setError(null); // Clear previous inline errors
     try {
       await login(email, password);
+      toast.success("Signed in successfully! Redirecting...");
       console.log("User signed in successfully, navigating based on role by App.js");
       // Navigation is now primarily handled by App.js based on AuthContext state changes
       // navigate('/'); // Or let App.js handle redirect based on role
     } catch (error) {
       console.error("Error signing in:", error);
+      let errorMessage = 'Failed to sign in. Please try again later.';
       // Firebase provides error.code and error.message
       if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-        setError('Invalid email or password. Please try again.');
+        errorMessage = 'Invalid email or password. Please try again.';
       } else if (error.code === 'auth/invalid-email') {
-        setError('Please enter a valid email address.');
-      } else {
-        setError('Failed to sign in. Please try again later.');
+        errorMessage = 'Please enter a valid email address.';
       }
+      toast.error(errorMessage);
+      setError(errorMessage); // Optional: keep inline error too
     }
   };
 
