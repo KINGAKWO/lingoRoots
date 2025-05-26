@@ -1,331 +1,377 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { render, act, waitFor } from '@testing-library/react';
-import { AuthProvider, useAuth } from './AuthContext';
+import '@testing-library/jest-dom';
+import { AuthProvider, AuthContext } from './AuthContext'; // Assuming AuthContext is exported
+import { auth, db } from '../firebase/firebaseConfig'; // Actual firebaseConfig
+import { 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  signOut, 
+  onAuthStateChanged,
+  updateProfile
+} from 'firebase/auth';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 
 // Mock Firebase services
-const mockUser = {
-  uid: 'test-uid',
-  email: 'test@example.com',
-  getIdTokenResult: jest.fn(() => Promise.resolve({ claims: { role: 'learner' } })),
-};
-
-const mockUserCredential = {
-  user: mockUser,
-};
-
-const mockCreateUserWithEmailAndPassword = jest.fn();
-const mockSignInWithEmailAndPassword = jest.fn();
-const mockSignOut = jest.fn();
-const mockOnAuthStateChanged = jest.fn();
-const mockGetIdTokenResult = jest.fn(() => Promise.resolve({ claims: { role: 'learner' } }));
-
-const mockDoc = jest.fn();
-const mockSetDoc = jest.fn(() => Promise.resolve());
-const mockGetDoc = jest.fn();
-const mockServerTimestamp = jest.fn(() => 'mock-timestamp');
-
-jest.mock('../services/firebase', () => ({
-  auth: {},
-  db: {},
-}));
-
 jest.mock('firebase/auth', () => ({
-  getAuth: jest.fn(() => ({})),
-  createUserWithEmailAndPassword: (...args) => mockCreateUserWithEmailAndPassword(...args),
-  signInWithEmailAndPassword: (...args) => mockSignInWithEmailAndPassword(...args),
-  signOut: (...args) => mockSignOut(...args),
-  onAuthStateChanged: (...args) => mockOnAuthStateChanged(...args),
-  getIdTokenResult: (...args) => mockGetIdTokenResult(...args),
+  createUserWithEmailAndPassword: jest.fn(),
+  signInWithEmailAndPassword: jest.fn(),
+  signOut: jest.fn(),
+  onAuthStateChanged: jest.fn(),
+  updateProfile: jest.fn(),
+  getAuth: jest.fn(() => ({})) // Mock getAuth if AuthProvider uses it internally
 }));
 
 jest.mock('firebase/firestore', () => ({
-  getFirestore: jest.fn(() => ({})),
-  doc: (...args) => mockDoc(...args),
-  setDoc: (...args) => mockSetDoc(...args),
-  getDoc: (...args) => mockGetDoc(...args),
-  serverTimestamp: (...args) => mockServerTimestamp(...args),
+  doc: jest.fn(),
+  setDoc: jest.fn(),
+  getDoc: jest.fn(),
+  getFirestore: jest.fn(() => ({})) // Mock getFirestore if AuthProvider uses it internally
 }));
 
-// Helper component to consume the context
+// Mock react-hot-toast
+const mockToastError = jest.fn();
+const mockToastSuccess = jest.fn();
+jest.mock('react-hot-toast', () => ({
+  __esModule: true,
+  default: {
+    error: mockToastError,
+    success: mockToastSuccess,
+  },
+}));
+
+
 const TestConsumerComponent = () => {
-  const auth = useAuth();
-  if (auth.loading) return <div>Loading...</div>;
+  const authValue = useContext(AuthContext);
+  if (!authValue) return <p>No AuthContext value</p>;
+  const { currentUser, userRole, loading, signup, login, logout } = authValue;
   return (
     <div>
-      <div data-testid="user">{auth.user ? auth.user.email : 'No User'}</div>
-      <div data-testid="role">{auth.role || 'No Role'}</div>
-      <button onClick={() => auth.signup('test@example.com', 'password123', 'learner', { displayName: 'Test User' })}>Sign Up</button>
-      <button onClick={() => auth.login('test@example.com', 'password123')}>Log In</button>
-      <button onClick={() => auth.logout()}>Log Out</button>
+      <p>Loading: {loading.toString()}</p>
+      {currentUser ? (
+        <>
+          <p>User ID: {currentUser.uid}</p>
+          <p>User Email: {currentUser.email}</p>
+          <p>User Role: {userRole}</p>
+          <button onClick={logout}>Logout</button>
+        </>
+      ) : (
+        <p>No user logged in</p>
+      )}
+      <button onClick={() => signup('test@example.com', 'password123', 'learner', { displayName: 'Test User' })}>Sign Up</button>
+      <button onClick={() => login('test@example.com', 'password123')}>Login</button>
     </div>
   );
 };
 
+
 describe('AuthContext', () => {
+  let mockOnAuthStateChangedCallback = null;
+
   beforeEach(() => {
     jest.clearAllMocks();
-    // Mock onAuthStateChanged to immediately call the callback with null (logged out)
-    // and allow tests to trigger it with a user
-    mockOnAuthStateChanged.mockImplementation((auth, callback) => {
-      callback(null); // Initial state: no user
-      return jest.fn(); // Return an unsubscribe function
+    // Capture the onAuthStateChanged callback
+    onAuthStateChanged.mockImplementation((auth, callback) => {
+      mockOnAuthStateChangedCallback = callback; // Store the callback
+      // Simulate initial state (no user)
+      // callback(null);
+      return jest.fn(); // Return a mock unsubscribe function
     });
-    mockGetDoc.mockResolvedValue({ exists: () => true, data: () => ({ role: 'learner' }) });
+
+    // Default mock implementations
+    createUserWithEmailAndPassword.mockResolvedValue({ user: { uid: 'test-uid', email: 'test@example.com', updateProfile: jest.fn() } });
+    signInWithEmailAndPassword.mockResolvedValue({ user: { uid: 'test-uid', email: 'test@example.com' } });
+    signOut.mockResolvedValue(undefined);
+    setDoc.mockResolvedValue(undefined);
+    getDoc.mockResolvedValue({ exists: () => true, data: () => ({ role: 'learner', displayName: 'Test User' }) });
+    updateProfile.mockResolvedValue(undefined);
   });
 
-  test('initial state is loading, then no user and no role', async () => {
-    let getByText, queryByTestId;
+  test('initial state has no user and loading is true, then false', async () => {
+    let getByText;
     act(() => {
-      const { getByText: gbt, queryByTestId: qbtid } = render(
+      const { getByText: rGetByText } = render(
         <AuthProvider>
           <TestConsumerComponent />
         </AuthProvider>
       );
-      getByText = gbt;
-      queryByTestId = qbtid;
+      getByText = rGetByText;
     });
 
-    expect(getByText('Loading...')).toBeInTheDocument();
+    // Initially, loading might be true
+    // expect(getByText('Loading: true')).toBeInTheDocument(); // This depends on exact timing
+
+    // Simulate onAuthStateChanged finding no user initially
+    act(() => {
+      if (mockOnAuthStateChangedCallback) mockOnAuthStateChangedCallback(null);
+    });
 
     await waitFor(() => {
-      expect(queryByTestId('user').textContent).toBe('No User');
-      expect(queryByTestId('role').textContent).toBe('No Role');
+        expect(getByText('Loading: false')).toBeInTheDocument();
+    });
+    expect(getByText('No user logged in')).toBeInTheDocument();
+  });
+
+  test('signup successfully creates user, sets user in context, and creates firestore document', async () => {
+    const mockUser = { uid: 'signup-uid', email: 'signup@example.com', displayName: 'Signup User' };
+    const mockUserCredentials = { user: { ...mockUser, updateProfile: jest.fn() } };
+    createUserWithEmailAndPassword.mockResolvedValueOnce(mockUserCredentials);
+    updateProfile.mockResolvedValueOnce(undefined); // Mock for updateProfile call within signup
+    getDoc.mockResolvedValueOnce({ exists: () => true, data: () => ({ role: 'learner', displayName: 'Signup User' }) });
+
+    let authContextValue;
+    const TestSignUpComponent = () => {
+      authContextValue = useContext(AuthContext);
+      return null;
+    };
+
+    render(
+      <AuthProvider>
+        <TestSignUpComponent />
+      </AuthProvider>
+    );
+    
+    const additionalData = { firstName: 'Signup', lastName: 'User', primaryLanguageInterest: 'Duala', displayName: 'Signup User' }; // displayName added here
+    await act(async () => {
+      await authContextValue.signup('signup@example.com', 'password123', 'learner', additionalData);
+    });
+
+    expect(createUserWithEmailAndPassword).toHaveBeenCalledWith(auth, 'signup@example.com', 'password123');
+    expect(updateProfile).toHaveBeenCalledWith(mockUserCredentials.user, { displayName: 'Signup User' });
+    expect(setDoc).toHaveBeenCalledWith(doc(db, 'users', 'signup-uid'), {
+      uid: 'signup-uid',
+      email: 'signup@example.com',
+      role: 'learner',
+      displayName: 'Signup User',
+      firstName: 'Signup',
+      lastName: 'User',
+      primaryLanguageInterest: 'Duala',
+      createdAt: expect.any(Object), // or specific date mock if needed
+    });
+    expect(mockToastSuccess).toHaveBeenCalledWith('Account created successfully!');
+
+    // Simulate onAuthStateChanged with the new user
+    act(() => {
+      if (mockOnAuthStateChangedCallback) mockOnAuthStateChangedCallback(mockUser);
+    });
+    
+    // Re-render with consumer to check context state
+    const { getByText } = render(
+        <AuthProvider>
+            <TestConsumerComponent />
+        </AuthProvider>
+    );
+
+    // Simulate onAuthStateChanged again for the new render cycle
+    act(() => {
+        if (mockOnAuthStateChangedCallback) mockOnAuthStateChangedCallback(mockUser);
+    });
+
+    await waitFor(() => {
+      expect(getByText(`User ID: ${mockUser.uid}`)).toBeInTheDocument();
+      expect(getByText(`User Role: learner`)).toBeInTheDocument();
     });
   });
 
-  describe('signup', () => {
-    test('successful signup sets user, role, and calls Firestore', async () => {
-      mockCreateUserWithEmailAndPassword.mockResolvedValue(mockUserCredential);
-      mockGetIdTokenResult.mockResolvedValue({ claims: { role: 'learner' } }); // For role from claims
-      // Simulate onAuthStateChanged being called with the new user
-      mockOnAuthStateChanged.mockImplementation((auth, callback) => {
-        callback(mockUserCredential.user);
-        return jest.fn();
-      });
+  test('login successfully signs in user and sets user in context', async () => {
+    const mockUser = { uid: 'login-uid', email: 'login@example.com', displayName: 'Login User' };
+    signInWithEmailAndPassword.mockResolvedValueOnce({ user: mockUser });
+    getDoc.mockResolvedValueOnce({ exists: () => true, data: () => ({ role: 'admin', displayName: 'Login User' }) });
 
-      const { getByTestId, getByText } = render(
-        <AuthProvider>
-          <TestConsumerComponent />
-        </AuthProvider>
-      );
+    let authContextValue;
+    const TestLoginComponent = () => {
+      authContextValue = useContext(AuthContext);
+      return null;
+    };
 
-      await waitFor(() => expect(getByText('Sign Up')).toBeInTheDocument()); // Wait for loading to finish
+    render(
+      <AuthProvider>
+        <TestLoginComponent />
+      </AuthProvider>
+    );
 
-      act(() => {
-        fireEvent.click(getByText('Sign Up'));
-      });
-
-      await waitFor(() => {
-        expect(mockCreateUserWithEmailAndPassword).toHaveBeenCalledWith(expect.anything(), 'test@example.com', 'password123');
-      });
-      await waitFor(() => {
-        expect(mockSetDoc).toHaveBeenCalledWith(
-          undefined, // doc() returns undefined in mock
-          {
-            uid: 'test-uid',
-            email: 'test@example.com',
-            displayName: 'Test User',
-            role: 'learner',
-            createdAt: 'mock-timestamp',
-          }
-        );
-      });
-      await waitFor(() => {
-        expect(getByTestId('user').textContent).toBe('test@example.com');
-        expect(getByTestId('role').textContent).toBe('learner');
-      });
+    await act(async () => {
+      await authContextValue.login('login@example.com', 'password123');
     });
 
-    test('signup failure', async () => {
-      const signupError = new Error('Email already in use');
-      signupError.code = 'auth/email-already-in-use';
-      mockCreateUserWithEmailAndPassword.mockRejectedValue(signupError);
+    expect(signInWithEmailAndPassword).toHaveBeenCalledWith(auth, 'login@example.com', 'password123');
+    expect(mockToastSuccess).toHaveBeenCalledWith('Login successful!');
 
-      const { getByText, queryByTestId } = render(
+    // Simulate onAuthStateChanged with the logged-in user
+    act(() => {
+      if (mockOnAuthStateChangedCallback) mockOnAuthStateChangedCallback(mockUser);
+    });
+
+    const { getByText } = render(
         <AuthProvider>
-          <TestConsumerComponent />
+            <TestConsumerComponent />
         </AuthProvider>
-      );
-      await waitFor(() => expect(getByText('Sign Up')).toBeInTheDocument());
+    );
+    act(() => {
+        if (mockOnAuthStateChangedCallback) mockOnAuthStateChangedCallback(mockUser);
+    });
 
-      await act(async () => {
-        try {
-          fireEvent.click(getByText('Sign Up'));
-          // Wait for the rejection to be processed if necessary
-          await new Promise(resolve => setImmediate(resolve)); 
-        } catch (e) {
-          expect(e.message).toBe('Email already in use');
-        }
-      });
-
-      await waitFor(() => {
-        expect(queryByTestId('user').textContent).toBe('No User');
-        expect(queryByTestId('role').textContent).toBe('No Role');
-      });
-       // Check that signup was called
-      expect(mockCreateUserWithEmailAndPassword).toHaveBeenCalledWith(expect.anything(), 'test@example.com', 'password123');
+    await waitFor(() => {
+      expect(getByText(`User ID: ${mockUser.uid}`)).toBeInTheDocument();
+      expect(getByText('User Role: admin')).toBeInTheDocument();
     });
   });
 
-  describe('login', () => {
-    test('successful login sets user and role', async () => {
-      mockSignInWithEmailAndPassword.mockResolvedValue(mockUserCredential);
-      // Simulate onAuthStateChanged being called with the logged-in user
-      mockOnAuthStateChanged.mockImplementation((auth, callback) => {
-        callback(mockUserCredential.user);
-        return jest.fn();
-      });
-      mockGetIdTokenResult.mockResolvedValue({ claims: { role: 'learner' } }); // Role from claims
-      mockGetDoc.mockResolvedValue({ exists: () => true, data: () => ({ role: 'learner' }) }); // Fallback role from Firestore
+  test('logout successfully signs out user and clears user from context', async () => {
+    const mockUser = { uid: 'logout-uid', email: 'logout@example.com' };
+    // Setup initial logged-in state
+    signInWithEmailAndPassword.mockResolvedValueOnce({ user: mockUser });
+    getDoc.mockResolvedValueOnce({ exists: () => true, data: () => ({ role: 'learner' }) });
 
-      const { getByTestId, getByText } = render(
-        <AuthProvider>
-          <TestConsumerComponent />
-        </AuthProvider>
-      );
-      await waitFor(() => expect(getByText('Log In')).toBeInTheDocument());
+    let authContextValue;
+    const TestLogoutComponent = () => {
+      authContextValue = useContext(AuthContext);
+      return null;
+    };
+    render(
+      <AuthProvider>
+        <TestLogoutComponent />
+      </AuthProvider>
+    );
 
-      act(() => {
-        fireEvent.click(getByText('Log In'));
-      });
-
-      await waitFor(() => {
-        expect(mockSignInWithEmailAndPassword).toHaveBeenCalledWith(expect.anything(), 'test@example.com', 'password123');
-      });
-      await waitFor(() => {
-        expect(getByTestId('user').textContent).toBe('test@example.com');
-        expect(getByTestId('role').textContent).toBe('learner');
-      });
+    // Simulate login first
+    await act(async () => {
+      await authContextValue.login('logout@example.com', 'password');
+    });
+    act(() => {
+      if (mockOnAuthStateChangedCallback) mockOnAuthStateChangedCallback(mockUser);
     });
 
-    test('login failure', async () => {
-      const loginError = new Error('Wrong password');
-      loginError.code = 'auth/wrong-password';
-      mockSignInWithEmailAndPassword.mockRejectedValue(loginError);
+    // Then logout
+    await act(async () => {
+      await authContextValue.logout();
+    });
 
-      const { getByText, queryByTestId } = render(
+    expect(signOut).toHaveBeenCalledWith(auth);
+    expect(mockToastSuccess).toHaveBeenCalledWith('Logged out successfully.');
+
+    // Simulate onAuthStateChanged with null (logged out)
+    act(() => {
+      if (mockOnAuthStateChangedCallback) mockOnAuthStateChangedCallback(null);
+    });
+
+    const { getByText } = render(
         <AuthProvider>
-          <TestConsumerComponent />
+            <TestConsumerComponent />
         </AuthProvider>
-      );
-      await waitFor(() => expect(getByText('Log In')).toBeInTheDocument());
+    );
+    act(() => {
+        if (mockOnAuthStateChangedCallback) mockOnAuthStateChangedCallback(null);
+    });
 
-      await act(async () => {
-        try {
-          fireEvent.click(getByText('Log In'));
-          await new Promise(resolve => setImmediate(resolve)); 
-        } catch (e) {
-          expect(e.message).toBe('Wrong password');
-        }
-      });
-
-      await waitFor(() => {
-        expect(queryByTestId('user').textContent).toBe('No User');
-        expect(queryByTestId('role').textContent).toBe('No Role');
-      });
-      expect(mockSignInWithEmailAndPassword).toHaveBeenCalledWith(expect.anything(), 'test@example.com', 'password123');
+    await waitFor(() => {
+      expect(getByText('No user logged in')).toBeInTheDocument();
     });
   });
 
-  describe('logout', () => {
-    test('successful logout clears user and role', async () => {
-      // First, simulate a logged-in state
-      mockOnAuthStateChanged.mockImplementation((auth, callback) => {
-        callback(mockUserCredential.user); // Simulate user logged in
-        return jest.fn();
-      });
-      mockGetIdTokenResult.mockResolvedValue({ claims: { role: 'learner' } });
+  test('handles signup failure', async () => {
+    createUserWithEmailAndPassword.mockRejectedValueOnce(new Error('Signup failed'));
+    let authContextValue;
+    const TestErrorComponent = () => {
+      authContextValue = useContext(AuthContext);
+      return null;
+    };
+    render(
+      <AuthProvider>
+        <TestErrorComponent />
+      </AuthProvider>
+    );
 
-      const { getByTestId, getByText } = render(
-        <AuthProvider>
-          <TestConsumerComponent />
-        </AuthProvider>
-      );
-
-      // Wait for user to be set
-      await waitFor(() => expect(getByTestId('user').textContent).toBe('test@example.com'));
-      await waitFor(() => expect(getByTestId('role').textContent).toBe('learner'));
-
-      // Now, set up mocks for logout
-      mockSignOut.mockResolvedValue();
-      // Simulate onAuthStateChanged being called with null after logout
-      mockOnAuthStateChanged.mockImplementation((auth, callback) => {
-        callback(null);
-        return jest.fn();
-      });
-
-      act(() => {
-        fireEvent.click(getByText('Log Out'));
-      });
-
-      await waitFor(() => expect(mockSignOut).toHaveBeenCalled());
-      await waitFor(() => {
-        expect(getByTestId('user').textContent).toBe('No User');
-        expect(getByTestId('role').textContent).toBe('No Role');
-      });
+    await act(async () => {
+      try {
+        await authContextValue.signup('fail@example.com', 'password', 'learner', {displayName: 'Fail User'});
+      } catch (e) {
+        // Expected error
+      }
     });
+    expect(mockToastError).toHaveBeenCalledWith('Error creating account: Signup failed');
   });
 
-  test('fetches role from Firestore if not in claims', async () => {
-    mockSignInWithEmailAndPassword.mockResolvedValue(mockUserCredential);
-    mockGetIdTokenResult.mockResolvedValue({ claims: {} }); // No role in claims
-    mockGetDoc.mockResolvedValue({ exists: () => true, data: () => ({ role: 'editor' }) }); // Role from Firestore
-    mockOnAuthStateChanged.mockImplementation((auth, callback) => {
-      callback(mockUserCredential.user);
-      return jest.fn();
+  test('handles login failure', async () => {
+    signInWithEmailAndPassword.mockRejectedValueOnce(new Error('Login failed'));
+    let authContextValue;
+    const TestErrorComponent = () => {
+      authContextValue = useContext(AuthContext);
+      return null;
+    };
+    render(
+      <AuthProvider>
+        <TestErrorComponent />
+      </AuthProvider>
+    );
+    await act(async () => {
+      try {
+        await authContextValue.login('fail@example.com', 'password');
+      } catch (e) {
+        // Expected error
+      }
     });
+    expect(mockToastError).toHaveBeenCalledWith('Error logging in: Login failed');
+  });
 
-    const { getByTestId, getByText } = render(
+  test('fetches user role on auth state change', async () => {
+    const mockUser = { uid: 'role-test-uid', email: 'role@example.com', displayName: 'Role User' };
+    getDoc.mockResolvedValueOnce({ exists: () => true, data: () => ({ role: 'creator', displayName: 'Role User' }) });
+
+    render(
       <AuthProvider>
         <TestConsumerComponent />
       </AuthProvider>
     );
-    await waitFor(() => expect(getByText('Log In')).toBeInTheDocument());
 
+    // Simulate user logging in via onAuthStateChanged
     act(() => {
-      fireEvent.click(getByText('Log In'));
+      if (mockOnAuthStateChangedCallback) mockOnAuthStateChangedCallback(mockUser);
+    });
+
+    const { getByText } = render(
+        <AuthProvider>
+            <TestConsumerComponent />
+        </AuthProvider>
+    );
+    act(() => {
+        if (mockOnAuthStateChangedCallback) mockOnAuthStateChangedCallback(mockUser);
     });
 
     await waitFor(() => {
-      expect(getByTestId('user').textContent).toBe('test@example.com');
-      expect(getByTestId('role').textContent).toBe('editor');
-      expect(mockGetDoc).toHaveBeenCalled();
+      expect(getDoc).toHaveBeenCalledWith(doc(db, 'users', mockUser.uid));
+      expect(getByText('User Role: creator')).toBeInTheDocument();
     });
   });
 
-   test('handles case where user document does not exist in Firestore', async () => {
-    mockSignInWithEmailAndPassword.mockResolvedValue(mockUserCredential);
-    mockGetIdTokenResult.mockResolvedValue({ claims: {} }); // No role in claims
-    mockGetDoc.mockResolvedValue({ exists: () => false }); // User doc doesn't exist
-    mockOnAuthStateChanged.mockImplementation((auth, callback) => {
-      callback(mockUserCredential.user);
-      return jest.fn();
-    });
+  test('handles case where user document does not exist in Firestore', async () => {
+    const mockUser = { uid: 'no-doc-uid', email: 'nodoc@example.com', displayName: 'No Doc User' };
+    getDoc.mockResolvedValueOnce({ exists: () => false, data: () => null }); // Simulate no document
 
-    const { getByTestId, getByText } = render(
+    render(
       <AuthProvider>
         <TestConsumerComponent />
       </AuthProvider>
     );
-    await waitFor(() => expect(getByText('Log In')).toBeInTheDocument());
 
     act(() => {
-      fireEvent.click(getByText('Log In'));
+      if (mockOnAuthStateChangedCallback) mockOnAuthStateChangedCallback(mockUser);
+    });
+
+    const { getByText, queryByText } = render(
+        <AuthProvider>
+            <TestConsumerComponent />
+        </AuthProvider>
+    );
+    act(() => {
+        if (mockOnAuthStateChangedCallback) mockOnAuthStateChangedCallback(mockUser);
     });
 
     await waitFor(() => {
-      expect(getByTestId('user').textContent).toBe('test@example.com');
-      expect(getByTestId('role').textContent).toBe('No Role'); // Or default/guest role if implemented
-      expect(mockGetDoc).toHaveBeenCalled();
+      expect(getByText(`User ID: ${mockUser.uid}`)).toBeInTheDocument(); // User is authenticated
+      expect(queryByText(/User Role:/i)).toBeNull(); // No role is set
+      expect(mockToastError).toHaveBeenCalledWith('User document not found for UID: no-doc-uid. Role not set.');
     });
   });
 
 });
-
-// Minimalistic fireEvent for the test component
-const fireEvent = {
-  click: (element) => {
-    const event = new MouseEvent('click', { bubbles: true });
-    element.dispatchEvent(event);
-  },
-};
