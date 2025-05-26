@@ -10,7 +10,7 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }) {
-  const [currentUser, setCurrentUser] = useState(null);
+  const [authUser, setAuthUser] = useState(null); // Renamed currentUser to authUser
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState(null);
 
@@ -30,7 +30,7 @@ export function AuthProvider({ children }) {
     if (primaryLanguageInterest) userDocData.primaryLanguageInterest = primaryLanguageInterest;
 
     await setDoc(doc(db, 'users', userCredential.user.uid), { ...userDocData, ...otherData });
-    // No need to manually set currentUser and userRole here, onAuthStateChanged will handle it
+    // No need to manually set authUser and userRole here, onAuthStateChanged will handle it
     return userCredential;
   }
 
@@ -44,7 +44,7 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setCurrentUser(user);
+      setAuthUser(user); // Updated to setAuthUser
       if (user) {
         try {
           // Prioritize custom claims for role
@@ -81,7 +81,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const value = {
-    user: currentUser,
+    user: authUser, // Updated to authUser
     role: userRole,
     signup,
     login,

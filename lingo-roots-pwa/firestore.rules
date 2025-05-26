@@ -9,16 +9,18 @@ service cloud.firestore {
 
     // User documents
     match /users/{userId} {
-      // Users can read their own document.
-      // Admins can read any user document.
+      // Users can read their own document. Admins can read any user document.
       allow read: if request.auth.uid == userId || getUserRole(request.auth.uid) == 'admin';
-      // Users can update their own document (e.g., displayName, preferences).
-      // Admins can update any user document.
-      // Role changes should ideally be handled by a Cloud Function with admin privileges.
-      allow update: if request.auth.uid == userId || getUserRole(request.auth.uid) == 'admin';
-      // User creation is handled by auth trigger or signup logic, not direct client write here usually.
-      allow create: if request.auth.uid == userId; // Allow user to create their own doc on signup
-      // Admins can delete users (consider soft delete)
+      
+      // Users can create their own document upon signup.
+      allow create: if request.auth.uid == userId;
+
+      // Users can update their own document, BUT NOT their role.
+      // Admins can update any field in any user document, including the role.
+      allow update: if request.auth.uid == userId && !(request.resource.data.role != resource.data.role) || 
+                       getUserRole(request.auth.uid) == 'admin';
+                       
+      // Admins can delete users (consider soft delete for data recovery).
       allow delete: if getUserRole(request.auth.uid) == 'admin';
     }
 

@@ -11,32 +11,44 @@ import { useAuth } from '../context/AuthContext';
  * @returns {JSX.Element} - The child component (Outlet) if authorized, or a Navigate component to redirect.
  */
 const ProtectedRoute = ({ allowedRoles }) => {
-  const { currentUser, userRole, loading } = useAuth();
+  const { user, userRole, loading } = useAuth(); // Changed currentUser to user
 
   if (loading) {
     // Optional: Show a loading spinner or a blank page while auth state is being determined
     return <p>Loading authentication status...</p>; // Or your app's global loader
   }
 
-  if (!currentUser) {
+  if (!user) { // Changed currentUser to user
     // User not logged in, redirect to sign-in page
     return <Navigate to="/signin" replace />;
   }
 
   if (allowedRoles && !allowedRoles.includes(userRole)) {
     // User is logged in but does not have the required role
-    // Redirect to a general dashboard or an unauthorized page
-    // For now, let's redirect to a generic dashboard or home page if their role doesn't match.
-    // A more sophisticated app might have a dedicated "Unauthorized" page.
     console.warn(`User with role '${userRole}' tried to access a route restricted to '${allowedRoles.join(', ')}'. Redirecting.`);
-    // Determine a safe fallback based on their actual role or a default page
+    // Redirect to a dedicated unauthorized page or a role-specific dashboard as a fallback.
+    // For now, providing a simple text feedback and redirecting to a generic fallback.
+    // A more sophisticated app would have a dedicated '/unauthorized' page.
     let fallbackPath = '/'; // Default fallback
-    if (userRole === 'Learner') fallbackPath = '/learn';
-    else if (userRole === 'Content Creator') fallbackPath = '/creator-dashboard';
-    else if (userRole === 'Administrator') fallbackPath = '/admin';
-    // If already on their role's page, but trying to access another protected one, maybe redirect to their own dashboard.
-    // Or, if they somehow have no role or an unexpected role, redirect to home/signin.
-    return <Navigate to={fallbackPath} replace />;
+    if (userRole === 'learner') fallbackPath = '/learn'; // Corrected role casing
+    else if (userRole === 'creator') fallbackPath = '/creator-dashboard'; // Corrected role casing
+    else if (userRole === 'admin') fallbackPath = '/admin'; // Corrected role casing
+    
+    // It's better to have a dedicated unauthorized page.
+    // For this example, we'll redirect to their likely dashboard or home.
+    // Consider adding a query param to show a message on the target page.
+    // e.g., return <Navigate to={`/unauthorized?attemptedPath=${window.location.pathname}`} replace />;
+    return (
+      <div style={{ textAlign: 'center', marginTop: '50px' }}>
+        <h1>Access Denied</h1>
+        <p>You do not have the necessary permissions to view this page.</p>
+        <p>Your current role is: <strong>{userRole || 'Not assigned'}</strong>.</p>
+        <p>Required roles: {allowedRoles.join(', ')}.</p>
+        <p>Redirecting to a safe page...</p>
+        {/* Navigate component will handle the actual redirect after a brief moment or immediately */}
+        <Navigate to={fallbackPath} replace />
+      </div>
+    );
   }
 
   // User is authenticated and has the required role (if specified)
