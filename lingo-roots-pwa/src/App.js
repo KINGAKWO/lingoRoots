@@ -11,7 +11,10 @@ import SignIn from './pages/SignIn';
 import LandingPage from './components/LandingPage/LandingPage';
 import AboutPage from './components/AboutPage';
 import LanguageDashboard from './components/LanguageDashboards';
-import LessonPage from './components/LessonPage';
+import LearnerDashboard from './pages/LearnerDashboard'; // Assuming this is a new page
+import LanguageSelectionPage from './pages/LanguageSelectionPage'; // Assuming this is a new page
+import LessonListPage from './pages/LessonListPage'; // Assuming this is a new page
+import LessonPage from './pages/LessonPage'; // Correcting path for LessonPage
 import LanguageSelector from './components/LanguageSelector';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -57,7 +60,11 @@ function AppRoutes() {
       </Route>
 
       <Route element={<ProtectedRoute allowedRoles={['Learner']} />}>
-        <Route path="/learn" element={<LearnPage />} />
+        <Route path="/learn" element={<LearnerDashboard />} />
+        <Route path="/select-language" element={<LanguageSelectionPage />} />
+        <Route path="/lessons/:langId" element={<LessonListPage />} /> {/* Route for listing lessons of a language */}
+        <Route path="/lessons/:langId/:lessonId" element={<LessonPage />} /> {/* Route for viewing a single lesson */}
+        {/* Add more routes here as needed */}
       </Route>
 
       <Route element={<ProtectedRoute allowedRoles={['Content Creator', 'Administrator']} />}>
