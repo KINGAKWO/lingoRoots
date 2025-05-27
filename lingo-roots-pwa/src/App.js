@@ -27,6 +27,7 @@ import CreatorDashboardPage from './pages/CreatorDashboardPage';
 import AdminPage from './pages/AdminPage';
 import AdminDashboard from './pages/AdminDashboard';
 import ModuleUploader from './pages/ModuleUploader';
+import ContentManagementTable from './components/admin/ContentManagementTable'; // Import ContentManagementTable
 
 function AppRoutes() {
   const { currentUser, userRole, loading } = useAuth();
@@ -76,6 +77,7 @@ function AppRoutes() {
       <Route element={<ProtectedRoute allowedRoles={['Content Creator', 'Administrator']} />}>
         <Route path="/creator-dashboard" element={<CreatorDashboardPage />} />
         <Route path="/module-uploader" element={<ModuleUploader />} />
+        <Route path="/creator-dashboard/content-management" element={<ContentManagementTable />} /> {/* Route for Content Management Table */}
       </Route>
 
       <Route element={<ProtectedRoute allowedRoles={['Administrator']} />}>

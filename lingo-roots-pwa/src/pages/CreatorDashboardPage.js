@@ -13,6 +13,7 @@ const CreatorDashboardPage = () => {
     { name: 'Create New Lesson', path: '/creator/lessons/new', icon: <FaPlusSquare className="mr-2" /> },
     { name: 'Manage Quizzes', path: '/creator/quizzes', icon: <FaQuestionCircle className="mr-2" /> },
     { name: 'Create New Quiz', path: '/creator/quizzes/new', icon: <FaPlusSquare className="mr-2" /> },
+    { name: 'Manage Content', path: '/creator-dashboard/content-management', icon: <FaEdit className="mr-2" /> }, // Link to Content Management Table
     // Future: { name: 'User Management', path: '/admin/users', icon: <FaUserShield className="mr-2" /> }
   ];
 
