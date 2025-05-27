@@ -86,7 +86,14 @@
 
 /* Specific button styling if not covered by general Tailwind button classes */
 .prev-button, .next-button, .submit-button {
-  /* Example: bg-sky-500 text-white hover:bg-sky-600 */
+   background-color: #0ea5e9; /* bg-sky-500 */
+   color: #ffffff; /* text-white */
+}
+
+.prev-button:hover,
+.next-button:hover, 
+.submit-button:hover {
+   background-color: #0284c7; /* hover:bg-sky-600 */
 }
 
 .quiz-results-container {
