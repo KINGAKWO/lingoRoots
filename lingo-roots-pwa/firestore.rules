@@ -9,8 +9,15 @@ service cloud.firestore {
 
     // User documents
     match /users/{userId} {
+      // User progress subcollection
+      match /userProgress/{document=**} {
+        // Learners can read and write their own progress.
+        allow read, write: if request.auth.uid == userId && getUserRole(request.auth.uid) == 'learner';
+      }
+
       // Users can read their own document. Admins can read any user document.
       allow read: if request.auth.uid == userId || getUserRole(request.auth.uid) == 'admin';
+
       
       // Users can create their own document upon signup.
       allow create: if request.auth.uid == userId;
@@ -27,15 +34,12 @@ service cloud.firestore {
     // Languages collection
     match /languages/{languageId} {
       // Allow reading the language document itself (e.g., for language metadata)
-      allow read: if request.auth != null; // Any authenticated user can see available languages
+      allow read: if request.auth != null && getUserRole(request.auth.uid) == 'learner';
 
       // Lessons subcollection
       match /lessons/{lessonId} {
-        // Learners, Content Creators, and Admins can read lessons.
-        allow read: if request.auth != null && 
-                       (getUserRole(request.auth.uid) == 'learner' || 
-                        getUserRole(request.auth.uid) == 'contentCreator' || 
-                        getUserRole(request.auth.uid) == 'admin');
+        // Learners can read lessons.
+        allow read: if request.auth != null && getUserRole(request.auth.uid) == 'learner';
         
         // Content Creators and Admins can create, update, and delete lessons.
         // Assumes a 'createdBy' field in lesson documents for ownership checks.
@@ -50,12 +54,10 @@ service cloud.firestore {
                           getUserRole(request.auth.uid) == 'admin');
       }
 
-      // Quizzes subcollection (example, adjust as needed)
+      // Quizzes subcollection
       match /quizzes/{quizId} {
-        allow read: if request.auth != null && 
-                       (getUserRole(request.auth.uid) == 'learner' || 
-                        getUserRole(request.auth.uid) == 'contentCreator' || 
-                        getUserRole(request.auth.uid) == 'admin');
+        // Learners can read quizzes.
+        allow read: if request.auth != null && getUserRole(request.auth.uid) == 'learner';
         allow create, update, delete: if request.auth != null && 
                                        (getUserRole(request.auth.uid) == 'contentCreator' || 
                                         getUserRole(request.auth.uid) == 'admin');
