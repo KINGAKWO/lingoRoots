@@ -1,0 +1,14 @@
+.quiz-view-container {
+    max-width: 800px; /* Or your preferred max width for quiz content */
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .navigation-controls button:disabled {
+    /* Tailwind handles this, but you can add more specific styles if needed */
+  }
+  
+  /* Styles for the results screen */
+  .quiz-results-container {
+    /* Add specific styling for the results summary if needed */
+  }

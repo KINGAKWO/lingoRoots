@@ -17,6 +17,7 @@ import LessonListPage from './pages/LessonListPage'; // Assuming this is a new p
 import LessonPage from './pages/LessonPage'; // Correcting path for LessonPage
 import LanguageSelector from './components/LanguageSelector';
 import ProtectedRoute from './components/ProtectedRoute';
+import QuizViewComponent from './pages/quiz/QuizViewComponent'; // Import the new QuizViewComponent
 
 // Role-specific pages
 import LearnPage from './pages/LearnPage';
@@ -64,6 +65,7 @@ function AppRoutes() {
         <Route path="/select-language" element={<LanguageSelectionPage />} />
         <Route path="/lessons/:langId" element={<LessonListPage />} /> {/* Route for listing lessons of a language */}
         <Route path="/lessons/:langId/:lessonId" element={<LessonPage />} /> {/* Route for viewing a single lesson */}
+        <Route path="/quiz/:langId/:quizId" element={<QuizViewComponent />} /> {/* Route for the quiz view */}
         {/* Add more routes here as needed */}
       </Route>
 
