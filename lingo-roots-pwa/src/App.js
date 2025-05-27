@@ -19,6 +19,7 @@ import LanguageSelector from './components/LanguageSelector';
 import ProtectedRoute from './components/ProtectedRoute';
 import QuizViewComponent from './pages/quiz/QuizViewComponent'; // Import the new QuizViewComponent
 import FlashcardTrainerComponent from './pages/flashcards/FlashcardTrainerComponent'; // Import FlashcardTrainerComponent
+import UserProfilePage from './pages/user/UserProfilePage'; // Import UserProfilePage
 
 // Role-specific pages
 import LearnPage from './pages/LearnPage';
@@ -68,6 +69,7 @@ function AppRoutes() {
         <Route path="/lessons/:langId/:lessonId" element={<LessonPage />} /> {/* Route for viewing a single lesson */}
         <Route path="/quiz/:langId/:quizId" element={<QuizViewComponent />} /> {/* Route for the quiz view */}
         <Route path="/flashcards/:langId/:lessonId" element={<FlashcardTrainerComponent />} /> {/* Route for flashcard trainer */}
+        <Route path="/profile" element={<UserProfilePage />} /> {/* Route for user profile */}
         {/* Add more routes here as needed */}
       </Route>
 

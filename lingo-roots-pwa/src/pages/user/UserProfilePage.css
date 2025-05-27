@@ -1,0 +1,80 @@
+/* UserProfilePage.css */
+
+/* General container for the profile page */
+.user-profile-container {
+  max-width: 1200px; /* Max width for larger screens */
+  /* Tailwind handles margin and padding, but can add specifics here if needed */
+}
+
+/* Styling for individual statistic cards */
+.stat-card {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Styling for individual quiz items in the detailed progress list */
+.quiz-item {
+  transition: background-color 0.2s ease-in-out;
+}
+
+.quiz-item:hover {
+  /* Example hover effect, Tailwind's dark:hover:bg-gray-700 might be preferred */
+  /* background-color: #f9fafb; */ 
+}
+
+/* Progress bar styling (Tailwind handles most of this, but can add custom animations or looks) */
+.progress-bar-fill {
+  transition: width 0.5s ease-in-out;
+}
+
+/* Responsive adjustments - Tailwind's responsive prefixes (sm:, md:, lg:) are primary */
+
+/* Mobile first: Styles here apply to smallest screens and up */
+.summary-stats-section .stat-card h3 {
+  font-size: 0.875rem; /* text-sm */
+}
+.summary-stats-section .stat-card p {
+  font-size: 1.5rem; /* text-2xl */
+}
+
+/* Small screens and up */
+@media (min-width: 640px) { /* Corresponds to sm: in Tailwind */
+  .summary-stats-section .stat-card h3 {
+    font-size: 1rem; /* text-base */
+  }
+  .summary-stats-section .stat-card p {
+    font-size: 1.875rem; /* text-3xl */
+  }
+  .user-profile-container header h1 {
+    font-size: 2.25rem; /* text-4xl */
+  }
+}
+
+/* Medium screens and up */
+@media (min-width: 768px) { /* Corresponds to md: in Tailwind */
+  /* Add any specific md breakpoint overrides if Tailwind isn't sufficient */
+}
+
+/* Large screens and up */
+@media (min-width: 1024px) { /* Corresponds to lg: in Tailwind */
+  /* Add any specific lg breakpoint overrides */
+}
+
+/* Dark mode specific CSS if not fully covered by Tailwind dark: variants */
+/* Example: 
+.dark .user-profile-container {
+  background-color: #1f2937; 
+}
+.dark .stat-card {
+  background-color: #374151;
+  border-color: #4b5563;
+}
+.dark .quiz-item {
+  background-color: #374151;
+  border-color: #4b5563;
+}
+*/
