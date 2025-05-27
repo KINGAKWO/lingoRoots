@@ -1,0 +1,41 @@
+.quiz-editor-form {
+  /* Using Tailwind utility classes primarily, so this file might be minimal */
+  /* Example: Add custom styles if needed beyond Tailwind's scope */
+}
+
+.question-block {
+  /* Styles for individual question blocks */
+  /* Tailwind classes like 'border', 'p-4', 'rounded-md', 'mb-6' are used directly in JSX */
+}
+
+.options-block {
+  /* Styles for multiple-choice options container */
+  /* Tailwind classes like 'pl-4', 'border-l-2', 'border-sky-500' are used directly in JSX */
+}
+
+.option-item {
+  /* Styles for individual option items */
+  /* Tailwind classes like 'flex', 'items-center', 'gap-3', 'p-2', 'bg-gray-50' are used directly in JSX */
+}
+
+.true-false-block {
+  /* Styles for true/false answer section */
+  /* Tailwind classes like 'pl-4', 'border-l-2', 'border-green-500' are used directly in JSX */
+}
+
+/* Add any specific overrides or complex styles here if Tailwind isn't sufficient */
+
+/* Styling for react-hot-toast (if not globally configured) */
+/* Usually, react-hot-toast is imported and used with its default styles or configured globally */
+
+/* Ensure form elements inherit dark mode styles correctly if not handled by Tailwind */
+.dark .quiz-editor-form input[type="text"],
+.dark .quiz-editor-form textarea,
+.dark .quiz-editor-form select {
+  /* Tailwind's dark:bg-gray-700 dark:text-white dark:border-gray-600 should handle this */
+}
+
+.dark .quiz-editor-form input[type="checkbox"],
+.dark .quiz-editor-form input[type="radio"] {
+  /* Tailwind's dark:bg-gray-600 dark:border-gray-500 should handle this */
+}
