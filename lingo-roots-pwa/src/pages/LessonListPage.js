@@ -11,7 +11,7 @@ const LessonListPage = () => {
   const [lessons, setLessons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedLanguage, setSelectedLanguage] = useState(null);
+  const [selectedLanguage, setSelectedLanguage] = useState(null); // Will store { id: 'duala', name: 'Duala' }
 
   useEffect(() => {
     if (!currentUser) {
@@ -36,10 +36,19 @@ const LessonListPage = () => {
           const langId = userData.activeLearningLanguage || (userData.selectedLanguages && userData.selectedLanguages[0]);
           
           if (langId) {
-            setSelectedLanguage(langId); // Store the language ID
+            // Fetch language details to get the name
+            const langDocRef = doc(db, 'languages', langId);
+            const langDocSnap = await getDoc(langDocRef);
+            let languageName = langId; // Default to ID if name not found
+            if (langDocSnap.exists()) {
+              languageName = langDocSnap.data().name || langId;
+            }
+            setSelectedLanguage({ id: langId, name: languageName });
+
             // 2. Fetch lessons for that language
             const lessonsRef = collection(db, 'languages', langId, 'lessons');
-            const q = query(lessonsRef); // Add orderBy if lessons have an 'order' field, e.g., orderBy('lessonNumber')
+            // Assuming lessons might have an 'order' field for proper display
+            const q = query(lessonsRef, where('languageId', '==', langId), orderBy('order', 'asc')); 
             const querySnapshot = await getDocs(q);
             const fetchedLessons = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             setLessons(fetchedLessons);
@@ -87,7 +96,7 @@ const LessonListPage = () => {
       <div className="container mx-auto px-4 py-8">
         <header className="mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold text-marine-blue text-center">
-            Lessons for {selectedLanguage.charAt(0).toUpperCase() + selectedLanguage.slice(1)} {/** Assumes langId is a string like 'duala' */}
+            Lessons for {selectedLanguage.name}
           </h1>
         </header>
 
@@ -97,7 +106,7 @@ const LessonListPage = () => {
               <div 
                 key={lesson.id} 
                 className="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 hover:shadow-xl transition-shadow cursor-pointer"
-                onClick={() => navigate(`/lessons/${selectedLanguage}/${lesson.id}`)} // Navigate to specific lesson page
+                onClick={() => navigate(`/lessons/${selectedLanguage.id}/${lesson.id}`)} // Navigate to specific lesson page
               >
                 <h2 className="text-xl font-semibold text-sky-700 dark:text-sky-500 mb-2">{lesson.title}</h2>
                 <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3">

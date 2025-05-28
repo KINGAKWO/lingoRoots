@@ -49,10 +49,16 @@ const LessonPage = () => {
         setCurrentIndex(currentLessonIndex);
 
         // Check completion status
-        const progressRef = doc(db, 'users', currentUser.uid, 'userProgress', lessonId);
-        const progressSnap = await getDoc(progressRef);
-        if (progressSnap.exists() && progressSnap.data().status === 'completed') {
-          setIsCompleted(true);
+        // User progress for a language is stored in a single document per language
+        const langProgressRef = doc(db, 'users', currentUser.uid, 'userProgress', langId);
+        const langProgressSnap = await getDoc(langProgressRef);
+        if (langProgressSnap.exists()) {
+          const progressData = langProgressSnap.data();
+          if (progressData.completedLessons && progressData.completedLessons.includes(lessonId)) {
+            setIsCompleted(true);
+          } else {
+            setIsCompleted(false);
+          }
         } else {
           setIsCompleted(false);
         }
@@ -71,18 +77,36 @@ const LessonPage = () => {
   const handleMarkAsComplete = async () => {
     if (!currentUser || !lesson) return;
     try {
-      const progressRef = doc(db, 'users', currentUser.uid, 'userProgress', lesson.id);
-      await setDoc(progressRef, {
-        langId: langId,
-        lessonId: lesson.id,
-        title: lesson.title, // Storing title for easier display in progress summaries
-        status: 'completed',
-        completedAt: serverTimestamp(),
-        lastAttemptedAt: serverTimestamp()
-      }, { merge: true });
+      const langProgressRef = doc(db, 'users', currentUser.uid, 'userProgress', langId);
+      const langProgressSnap = await getDoc(langProgressRef);
+
+      let newProgressData = {
+        completedLessons: [lesson.id],
+        activeLessons: {},
+        totalPoints: lesson.points || 10, // Award some points for lesson completion, default 10
+        wordsLearnedCount: (lesson.wordsInLesson || 5) + (langProgressSnap.exists() ? langProgressSnap.data().wordsLearnedCount || 0 : 0), // Add words from this lesson
+        lastUpdatedAt: serverTimestamp(),
+      };
+
+      if (langProgressSnap.exists()) {
+        const existingData = langProgressSnap.data();
+        newProgressData.completedLessons = Array.from(new Set([...(existingData.completedLessons || []), lesson.id]));
+        newProgressData.activeLessons = { ...(existingData.activeLessons || {}) };
+        delete newProgressData.activeLessons[lesson.id]; // Remove from active if it was there
+        newProgressData.totalPoints = (existingData.totalPoints || 0) + (lesson.points || 10);
+        // wordsLearnedCount is already handled by adding to existing or 0
+      } else {
+        // This is the first lesson completed for this language by the user
+        // wordsLearnedCount and totalPoints are set as above
+      }
+
+      await setDoc(langProgressRef, newProgressData, { merge: true });
       setIsCompleted(true);
-      // Optionally, navigate to next lesson or show a success message
-      toast.success('Lesson marked as complete!');
+      toast.success('Lesson marked as complete! Progress saved.');
+
+      // Potentially update a local state for immediate UI feedback if needed
+      // e.g., if LearnerDashboard was using a context, we could update it here.
+
     } catch (err) {
       console.error('Error marking lesson complete:', err);
       setError(`Failed to update progress: ${err.message}. Please try again.`);

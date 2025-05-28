@@ -1,65 +1,108 @@
 import React, { useState, useEffect } from 'react';
-// import { useAuth } from '../context/AuthContext'; // Assuming AuthContext provides user info
-// import { db } from '../services/firebase'; // Assuming firebase is initialized in services
-// import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
+import { useAuth } from '../context/AuthContext'; // Assuming AuthContext provides user info
+import { db } from '../services/firebase'; // Assuming firebase is initialized in services
+import { collection, query, getDocs, doc, getDoc, orderBy } from 'firebase/firestore';
 
 const LearnerDashboard = () => {
-  // const { currentUser } = useAuth(); // Get current user
+  const { currentUser } = useAuth(); // Get current user
   const [selectedLanguage, setSelectedLanguage] = useState(null); // e.g., { id: 'duala', name: 'Duala' }
-  const [userProgress, setUserProgress] = useState({ modulesCompleted: 0, wordsLearned: 0 });
+  const [userProgress, setUserProgress] = useState({ modulesCompleted: 0, wordsLearned: 0, points: 0 });
   const [learningModules, setLearningModules] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Mock data - replace with Firestore fetching logic
-  const mockSelectedLanguage = { id: 'duala', name: 'Duala' };
-  const mockUserProgress = { modulesCompleted: 2, wordsLearned: 50 };
-  const mockModules = [
-    { id: 'module1', title: 'Greetings & Introductions', progress: 75, status: 'Continue' },
-    { id: 'module2', title: 'Basic Vocabulary', progress: 30, status: 'Continue' },
-    { id: 'module3', title: 'Forming Sentences', progress: 0, status: 'Start' },
-  ];
-
   useEffect(() => {
-    // --- Firestore Data Fetching Logic ---
-    // 1. Get selected language (this might come from a global state or route param)
-    // For now, using mock data
-    setSelectedLanguage(mockSelectedLanguage);
+    const fetchData = async () => {
+      if (!currentUser) {
+        setLoading(false);
+        return;
+      }
 
-    // 2. Fetch user progress for the selected language
-    // const fetchUserProgress = async () => {
-    //   if (currentUser && selectedLanguage) {
-    //     const progressRef = doc(db, 'users', currentUser.uid, 'userProgress', selectedLanguage.id);
-    //     const progressSnap = await getDoc(progressRef);
-    //     if (progressSnap.exists()) {
-    //       const data = progressSnap.data();
-    //       setUserProgress({
-    //         modulesCompleted: data.completedLessons ? data.completedLessons.length : 0,
-    //         wordsLearned: data.points || 0, // Assuming points can represent words learned or similar metric
-    //       });
-    //     } else {
-    //       setUserProgress({ modulesCompleted: 0, wordsLearned: 0 });
-    //     }
-    //   }
-    // };
-    setUserProgress(mockUserProgress); // Using mock data
+      setLoading(true);
+      try {
+        // 1. Get user's primary language interest
+        const userDocRef = doc(db, 'users', currentUser.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        let languageIdToFetch = null;
+        let languageName = 'Selected Language'; // Default name
 
-    // 3. Fetch available learning modules for the selected language
-    // const fetchModules = async () => {
-    //   if (selectedLanguage) {
-    //     const modulesRef = collection(db, 'languages', selectedLanguage.id, 'lessons'); // Assuming 'lessons' are 'modules'
-    //     const q = query(modulesRef); // Add orderBy('order') if you have an order field
-    //     const querySnapshot = await getDocs(q);
-    //     const fetchedModules = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    //     // Map fetchedModules to include progress and status (requires more logic)
-    //     setLearningModules(fetchedModules.map(m => ({ ...m, progress: Math.random() * 100, status: Math.random() > 0.5 ? 'Start' : 'Continue' }))); // Mock progress
-    //   }
-    // };
-    setLearningModules(mockModules); // Using mock data
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data();
+          languageIdToFetch = userData.primaryLanguageInterest; // Assuming this stores the ID like 'duala'
+          // If primaryLanguageInterest stores an object like {id: 'duala', name: 'Duala'}, adjust accordingly
+          // For now, assume it's an ID, and we need to fetch the language name
+          if (languageIdToFetch) {
+            const langDocRef = doc(db, 'languages', languageIdToFetch);
+            const langDocSnap = await getDoc(langDocRef);
+            if (langDocSnap.exists()) {
+              languageName = langDocSnap.data().name || languageIdToFetch;
+            }
+            setSelectedLanguage({ id: languageIdToFetch, name: languageName });
+          } else {
+            // Handle case where user has no primary language selected
+            // Maybe redirect to a language selection page or show a message
+            console.log("User has no primary language selected.");
+            setLoading(false);
+            return;
+          }
+        } else {
+          console.error("User document not found.");
+          setLoading(false);
+          return;
+        }
 
-    // fetchUserProgress();
-    // fetchModules();
-    setLoading(false);
-  }, [/* currentUser, selectedLanguage */]);
+        if (!languageIdToFetch) {
+            setLoading(false);
+            return;
+        }
+
+        // 2. Fetch user progress for the selected language
+        const progressDocRef = doc(db, 'users', currentUser.uid, 'userProgress', languageIdToFetch);
+        const progressDocSnap = await getDoc(progressDocRef);
+        let currentProgressData = { completedLessons: [], activeLessons: {}, totalPoints: 0, wordsLearnedCount: 0 };
+
+        if (progressDocSnap.exists()) {
+          currentProgressData = progressDocSnap.data();
+          setUserProgress({
+            modulesCompleted: currentProgressData.completedLessons?.length || 0,
+            wordsLearned: currentProgressData.wordsLearnedCount || 0,
+            points: currentProgressData.totalPoints || 0,
+          });
+        } else {
+          setUserProgress({ modulesCompleted: 0, wordsLearned: 0, points: 0 });
+        }
+
+        // 3. Fetch available learning modules (lessons) for the selected language
+        const modulesRef = collection(db, 'languages', languageIdToFetch, 'lessons');
+        const q = query(modulesRef, orderBy('order', 'asc')); // Assuming an 'order' field for modules
+        const querySnapshot = await getDocs(q);
+        const fetchedModules = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        // Map fetchedModules to include progress and status
+        const modulesWithProgress = fetchedModules.map(module => {
+          let progress = 0;
+          let status = 'Start';
+
+          if (currentProgressData.completedLessons?.includes(module.id)) {
+            progress = 100;
+            status = 'Completed'; // Or 'Review'
+          } else if (currentProgressData.activeLessons && currentProgressData.activeLessons[module.id]) {
+            progress = currentProgressData.activeLessons[module.id].progressPercent || 0;
+            status = 'Continue';
+          }
+          return { ...module, progress, status };
+        });
+        setLearningModules(modulesWithProgress);
+
+      } catch (error) {
+        console.error("Error fetching learner dashboard data:", error);
+        // Optionally set an error state to display to the user
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [currentUser]);
 
   if (loading) {
     return <div className="p-4 sm:p-6 text-center text-gray-500">Loading dashboard...</div>;
@@ -86,7 +129,7 @@ const LearnerDashboard = () => {
           </div>
           <div className="bg-sky-100 p-4 rounded-md">
             <p className="text-base sm:text-lg text-gray-700">Words Learned (Points)</p>
-            <p className="text-2xl sm:text-3xl font-bold text-sky-600">{userProgress.wordsLearned}</p>
+            <p className="text-2xl sm:text-3xl font-bold text-sky-600">{userProgress.wordsLearned} ({userProgress.points} pts)</p>
           </div>
         </div>
       </section>
