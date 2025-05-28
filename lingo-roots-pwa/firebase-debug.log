@@ -1,0 +1,49 @@
+[debug] [2025-05-28T12:29:58.808Z] ----------------------------------------------------------------------
+[debug] [2025-05-28T12:29:58.819Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\JA 12\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js init emulators
+[debug] [2025-05-28T12:29:58.820Z] CLI Version:   14.4.0
+[debug] [2025-05-28T12:29:58.820Z] Platform:      win32
+[debug] [2025-05-28T12:29:58.820Z] Node Version:  v22.14.0
+[debug] [2025-05-28T12:29:58.821Z] Time:          Wed May 28 2025 13:29:58 GMT+0100 (West Africa Standard Time)
+[debug] [2025-05-28T12:29:58.821Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-05-28T12:29:59.677Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-05-28T12:29:59.679Z] > authorizing via signed-in user (kingakwomakembe@gmail.com)
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  C:\Users\JA 12\Documents\Projects\B.TECH\lingoRoots\lingo-roots-pwa
+
+Before we get started, keep in mind:
+
+  * You are initializing within an existing Firebase project directory
+
+[info] 
+=== Project Setup
+[info] 
+[info] First, let's associate this project directory with a Firebase project.
+[info] You can create multiple project aliases by running firebase use --add, 
+[info] but for now we'll just set up a default project.
+[info] 
+[debug] [2025-05-28T12:40:56.396Z] Using project from CLI flag: lingoroots-30066
+[debug] [2025-05-28T12:40:56.401Z] Checked if tokens are valid: true, expires at: 1748437835199
+[debug] [2025-05-28T12:40:56.402Z] Checked if tokens are valid: true, expires at: 1748437835199
+[debug] [2025-05-28T12:40:56.407Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/lingoroots-30066 [none]
+[debug] [2025-05-28T12:40:57.776Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/lingoroots-30066 200
+[debug] [2025-05-28T12:40:57.777Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/lingoroots-30066 {"projectId":"lingoroots-30066","projectNumber":"100987690274","displayName":"lingoRoots","name":"projects/lingoroots-30066","resources":{"hostingSite":"lingoroots-30066"},"state":"ACTIVE","etag":"1_1606feec-0f09-44ea-84dd-3b5e9adec68f"}
+[info] i  Using project lingoroots-30066 (lingoRoots) 
+[info] 
+=== Emulators Setup
+[info] i  Port for auth already configured: 9099 
+[info] i  Port for functions already configured: 5001 
+[info] i  Port for firestore already configured: 8080 
+[info] i  Emulator UI already enabled with port: 3000 
+[info] i  firestore: downloading cloud-firestore-emulator-v1.19.8.jar... {"metadata":{"emulator":{"name":"firestore"},"message":"downloading cloud-firestore-emulator-v1.19.8.jar..."}}
+[debug] [2025-05-28T12:41:15.386Z] >>> [apiv2][query] GET https://storage.googleapis.com/firebase-preview-drop/emulator/cloud-firestore-emulator-v1.19.8.jar 
+[debug] [2025-05-28T12:41:17.220Z] <<< [apiv2][status] GET https://storage.googleapis.com/firebase-preview-drop/emulator/cloud-firestore-emulator-v1.19.8.jar 200
+[debug] [2025-05-28T12:41:17.221Z] <<< [apiv2][body] GET https://storage.googleapis.com/firebase-preview-drop/emulator/cloud-firestore-emulator-v1.19.8.jar [stream]

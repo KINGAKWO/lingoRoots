@@ -42,15 +42,15 @@ service cloud.firestore {
         allow read: if request.auth != null && getUserRole(request.auth.uid) == 'learner';
         
         // Content Creators and Admins can create, update, and delete lessons.
-        // Assumes a 'createdBy' field in lesson documents for ownership checks.
         allow create: if request.auth != null && 
                          (getUserRole(request.auth.uid) == 'contentCreator' || 
                           getUserRole(request.auth.uid) == 'admin');
+        // Content Creators or Admins can update and delete lessons.
         allow update: if request.auth != null && 
-                         ((getUserRole(request.auth.uid) == 'contentCreator' && resource.data.createdBy == request.auth.uid) || 
+                         (getUserRole(request.auth.uid) == 'contentCreator' || 
                           getUserRole(request.auth.uid) == 'admin');
         allow delete: if request.auth != null && 
-                         ((getUserRole(request.auth.uid) == 'contentCreator' && resource.data.createdBy == request.auth.uid) || 
+                         (getUserRole(request.auth.uid) == 'contentCreator' || 
                           getUserRole(request.auth.uid) == 'admin');
       }
 
