@@ -30,9 +30,9 @@ const ProtectedRoute = ({ allowedRoles }) => {
     // For now, providing a simple text feedback and redirecting to a generic fallback.
     // A more sophisticated app would have a dedicated '/unauthorized' page.
     let fallbackPath = '/'; // Default fallback
-    if (userRole === 'learner') fallbackPath = '/learn'; // Corrected role casing
-    else if (userRole === 'creator') fallbackPath = '/creator-dashboard'; // Corrected role casing
-    else if (userRole === 'admin') fallbackPath = '/admin'; // Corrected role casing
+    if (userRole === 'Learner') fallbackPath = '/learn';
+    else if (userRole === 'Content Creator') fallbackPath = '/creator-dashboard';
+    else if (userRole === 'Administrator') fallbackPath = '/admin';
     
     // It's better to have a dedicated unauthorized page.
     // For this example, we'll redirect to their likely dashboard or home.
@@ -43,8 +43,8 @@ const ProtectedRoute = ({ allowedRoles }) => {
         <h1>Access Denied</h1>
         <p>You do not have the necessary permissions to view this page.</p>
         <p>Your current role is: <strong>{userRole || 'Not assigned'}</strong>.</p>
-        <p>Required roles: {allowedRoles.join(', ')}.</p>
-        <p>Redirecting to a safe page...</p>
+        <p>You do not have the required role(s): <strong>{allowedRoles.join(', ')}</strong> to access this page.</p>
+        <p>Redirecting you to a relevant page...</p>
         {/* Navigate component will handle the actual redirect after a brief moment or immediately */}
         <Navigate to={fallbackPath} replace />
       </div>

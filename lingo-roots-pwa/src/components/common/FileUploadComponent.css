@@ -1,0 +1,9 @@
+/* 
+  FileUploadComponent.css
+  Use this file for any custom CSS that cannot be easily achieved with Tailwind CSS.
+  For example, complex animations, pseudo-elements not fully supported by Tailwind's JIT, 
+  or very specific overrides.
+
+  Most styling should be done directly in the JSX using Tailwind CSS classes for consistency
+  and to leverage the utility-first approach.
+*/

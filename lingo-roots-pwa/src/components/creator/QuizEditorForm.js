@@ -4,10 +4,11 @@ import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 import toast from 'react-hot-toast';
-import { db } from '../../services/firebase'; // Assuming firebase storage is exported from here
-import { doc, getDoc, setDoc, serverTimestamp, collection, addDoc, updateDoc } from 'firebase/firestore';
+import { db } from '../../services/firebase';
+import { doc, getDoc, setDoc, serverTimestamp, collection, addDoc, updateDoc, getDocs } from 'firebase/firestore'; // Added getDocs
 import { AuthContext } from '../../context/AuthContext';
-import './QuizEditorForm.css'; // We will create this CSS file next
+import FileUploadComponent from '../common/FileUploadComponent'; // Import FileUploadComponent
+import './QuizEditorForm.css';
 
 // Validation Schema
 const questionSchema = Yup.object().shape({
@@ -38,6 +39,7 @@ const validationSchema = Yup.object().shape({
   title: Yup.string().required('Quiz title is required').min(3, 'Title must be at least 3 characters'),
   languageId: Yup.string().required('Language ID is required'),
   questions: Yup.array().of(questionSchema).min(1, 'A quiz must have at least one question'),
+  // Optional: Add validation for image/audio if they become required or have specific constraints
 });
 
 const QuizEditorForm = ({ quizId, langId, onFormSubmitSuccess }) => {
@@ -45,6 +47,8 @@ const QuizEditorForm = ({ quizId, langId, onFormSubmitSuccess }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [isEditMode, setIsEditMode] = useState(!!quizId);
+  const [imageUrlToSubmit, setImageUrlToSubmit] = useState(null);
+  const [audioUrlToSubmit, setAudioUrlToSubmit] = useState(null);
 
   const { control, register, handleSubmit, setValue, getValues, watch, formState: { errors }, reset } = useForm({
     resolver: yupResolver(validationSchema),
@@ -77,6 +81,9 @@ const QuizEditorForm = ({ quizId, langId, onFormSubmitSuccess }) => {
             const quizData = quizSnap.data();
             setValue('title', quizData.title);
             setValue('languageId', langId);
+            if (quizData.imageUrl) setImageUrlToSubmit(quizData.imageUrl);
+            if (quizData.audioUrl) setAudioUrlToSubmit(quizData.audioUrl);
+
             // Fetch questions from subcollection
             const questionsColRef = collection(db, 'languages', langId, 'quizzes', quizId, 'questions');
             const questionsSnap = await getDocs(questionsColRef);
@@ -84,7 +91,6 @@ const QuizEditorForm = ({ quizId, langId, onFormSubmitSuccess }) => {
             setValue('questions', fetchedQuestions);
           } else {
             toast.error('Quiz not found.');
-            // navigate('/creator-dashboard'); // Or some error page
           }
         } catch (error) {
           console.error('Error fetching quiz:', error);
@@ -93,8 +99,25 @@ const QuizEditorForm = ({ quizId, langId, onFormSubmitSuccess }) => {
         setLoading(false);
       };
       fetchQuizData();
+    } else {
+      setImageUrlToSubmit(null);
+      setAudioUrlToSubmit(null);
     }
   }, [isEditMode, quizId, langId, setValue, currentUser, navigate]);
+
+  const handleImageUploadSuccess = (url) => {
+    setImageUrlToSubmit(url);
+    toast.success('Image uploaded for quiz.');
+  };
+
+  const handleAudioUploadSuccess = (url) => {
+    setAudioUrlToSubmit(url);
+    toast.success('Audio uploaded for quiz.');
+  };
+
+  const handleUploadError = (error, fileType) => {
+    toast.error(`Quiz ${fileType} upload failed: ${error.message}`);
+  };
 
   const onSubmit = async (data) => {
     if (!currentUser) {
@@ -107,6 +130,8 @@ const QuizEditorForm = ({ quizId, langId, onFormSubmitSuccess }) => {
       const quizData = {
         title: data.title,
         langId: data.languageId,
+        imageUrl: imageUrlToSubmit || null,
+        audioUrl: audioUrlToSubmit || null,
         updatedAt: serverTimestamp(),
         updatedBy: currentUser.uid,
       };
@@ -145,9 +170,11 @@ const QuizEditorForm = ({ quizId, langId, onFormSubmitSuccess }) => {
       if (onFormSubmitSuccess) onFormSubmitSuccess(currentQuizId);
       if (!isEditMode) {
         reset();
-        // navigate(`/creator-dashboard/quizzes/${data.languageId}/${currentQuizId}/edit`); // Option to navigate to edit mode
+        setImageUrlToSubmit(null);
+        setAudioUrlToSubmit(null);
+        // navigate(`/creator-dashboard/quizzes/${data.languageId}/${currentQuizId}/edit`);
       } else {
-        // Potentially re-fetch to ensure data consistency if staying on page
+        // For edit mode, we might want to keep the form populated or re-fetch
       }
 
     } catch (error) {
@@ -157,6 +184,10 @@ const QuizEditorForm = ({ quizId, langId, onFormSubmitSuccess }) => {
       setLoading(false);
     }
   };
+
+  if (loading && isEditMode && !imageUrlToSubmit && !audioUrlToSubmit && quizId) { 
+    return <div className="p-6 text-center text-gray-500 dark:text-gray-400">Loading quiz details...</div>;
+  }
 
   const addQuestion = (type = 'multiple-choice') => {
     const defaultQuestion = {
@@ -216,9 +247,63 @@ const QuizEditorForm = ({ quizId, langId, onFormSubmitSuccess }) => {
         {errors.title && <p className="mt-1 text-xs text-red-500">{errors.title.message}</p>}
       </div>
 
-      <hr className="dark:border-gray-600"/>
+      {/* Image Upload for Quiz (Optional) */}
+      <div className="space-y-2 mt-4">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Quiz Image (Optional)</label>
+        {imageUrlToSubmit && (
+          <div className="my-2 p-2 border border-gray-200 dark:border-gray-700 rounded-md">
+            <p className="text-xs text-gray-500 dark:text-gray-400">Current quiz image preview:</p>
+            <img src={imageUrlToSubmit} alt="Current quiz" className="max-h-40 rounded-md shadow my-1" />
+            <button 
+              type="button" 
+              onClick={() => setImageUrlToSubmit(null)} 
+              className="text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+            >
+              Remove Image
+            </button>
+          </div>
+        )}
+        {!imageUrlToSubmit && (
+          <FileUploadComponent 
+            fileType="image"
+            onUploadSuccess={handleImageUploadSuccess}
+            onUploadError={(err) => handleUploadError(err, 'image')}
+            storagePath={`quiz_uploads/${currentUser?.uid || 'guest'}/images`}
+            fileNamePrefix={`quiz_${langId || 'anylang'}_${quizId || Date.now()}_`}
+          />
+        )}
+      </div>
 
-      <div>
+      {/* Audio Upload for Quiz (Optional) */}
+      <div className="space-y-2 mt-4">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Quiz Audio (Optional)</label>
+        {audioUrlToSubmit && (
+          <div className="my-2 p-2 border border-gray-200 dark:border-gray-700 rounded-md">
+            <p className="text-xs text-gray-500 dark:text-gray-400">Current quiz audio:</p>
+            <audio controls src={audioUrlToSubmit} className="w-full max-w-xs my-1"></audio>
+            <button 
+              type="button" 
+              onClick={() => setAudioUrlToSubmit(null)} 
+              className="text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+            >
+              Remove Audio
+            </button>
+          </div>
+        )}
+        {!audioUrlToSubmit && (
+          <FileUploadComponent 
+            fileType="audio"
+            onUploadSuccess={handleAudioUploadSuccess}
+            onUploadError={(err) => handleUploadError(err, 'audio')}
+            storagePath={`quiz_uploads/${currentUser?.uid || 'guest'}/audios`}
+            fileNamePrefix={`quiz_${langId || 'anylang'}_${quizId || Date.now()}_`}
+          />
+        )}
+      </div>
+
+      <hr className="dark:border-gray-600 mt-6"/>
+
+      <div className="mt-6">
         <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Questions</h3>
         {fields.map((field, index) => (
           <div key={field.id} className="question-block border border-gray-300 dark:border-gray-700 p-4 rounded-md mb-6 space-y-4">

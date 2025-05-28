@@ -6,26 +6,16 @@ import * as Yup from 'yup';
 import toast from 'react-hot-toast';
 import { db, storage } from '../../services/firebase'; // Assuming firebase storage is exported from here
 import { doc, getDoc, setDoc, serverTimestamp, collection, addDoc, updateDoc } from 'firebase/firestore';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { AuthContext } from '../../context/AuthContext';
-import './LessonEditorForm.css'; // We will create this CSS file next
+import FileUploadComponent from '../common/FileUploadComponent'; // Import FileUploadComponent
+import './LessonEditorForm.css';
 
 // Validation Schema
 const validationSchema = Yup.object().shape({
   title: Yup.string().required('Lesson title is required').min(5, 'Title must be at least 5 characters'),
   textContent: Yup.string().required('Lesson content is required').min(20, 'Content must be at least 20 characters'),
-  languageId: Yup.string().required('Language ID is required'), // Assuming this will be passed or selected
-  // Optional fields, so no .required()
-  imageFile: Yup.mixed().test('fileSize', 'Image file too large, max 2MB', value => {
-    return !value || (value && value[0] && value[0].size <= 2 * 1024 * 1024); // 2MB
-  }).test('fileType', 'Unsupported image format', value => {
-    return !value || (value && value[0] && ['image/jpeg', 'image/png', 'image/gif'].includes(value[0].type));
-  }),
-  audioFile: Yup.mixed().test('fileSize', 'Audio file too large, max 5MB', value => {
-    return !value || (value && value[0] && value[0].size <= 5 * 1024 * 1024); // 5MB
-  }).test('fileType', 'Unsupported audio format', value => {
-    return !value || (value && value[0] && ['audio/mpeg', 'audio/wav', 'audio/ogg'].includes(value[0].type));
-  }),
+  languageId: Yup.string().required('Language ID is required'),
+  // File validation will be handled by FileUploadComponent
 });
 
 const LessonEditorForm = ({ lessonId, langId, onFormSubmitSuccess }) => {
@@ -33,9 +23,9 @@ const LessonEditorForm = ({ lessonId, langId, onFormSubmitSuccess }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [isEditMode, setIsEditMode] = useState(!!lessonId);
-  const [existingImageUrl, setExistingImageUrl] = useState(null);
-  const [existingAudioUrl, setExistingAudioUrl] = useState(null);
-  const [uploadProgress, setUploadProgress] = useState({ image: 0, audio: 0 });
+  // State to hold URLs for submission, initialized by existing URLs or updated by FileUploadComponent
+  const [imageUrlToSubmit, setImageUrlToSubmit] = useState(null);
+  const [audioUrlToSubmit, setAudioUrlToSubmit] = useState(null);
 
   const {
     register,
@@ -46,7 +36,7 @@ const LessonEditorForm = ({ lessonId, langId, onFormSubmitSuccess }) => {
   } = useForm({
     resolver: yupResolver(validationSchema),
     defaultValues: {
-      languageId: langId || '', // Pre-fill if langId is passed
+      languageId: langId || '',
     }
   });
 
@@ -61,12 +51,11 @@ const LessonEditorForm = ({ lessonId, langId, onFormSubmitSuccess }) => {
             const lessonData = lessonSnap.data();
             setValue('title', lessonData.title);
             setValue('textContent', lessonData.textContent);
-            setValue('languageId', langId); // Ensure langId is set
-            if (lessonData.imageUrl) setExistingImageUrl(lessonData.imageUrl);
-            if (lessonData.audioUrl) setExistingAudioUrl(lessonData.audioUrl);
+            setValue('languageId', langId);
+            if (lessonData.imageUrl) setImageUrlToSubmit(lessonData.imageUrl);
+            if (lessonData.audioUrl) setAudioUrlToSubmit(lessonData.audioUrl);
           } else {
             toast.error('Lesson not found.');
-            // navigate('/creator-dashboard'); // Or some error page
           }
         } catch (error) {
           console.error('Error fetching lesson:', error);
@@ -75,44 +64,25 @@ const LessonEditorForm = ({ lessonId, langId, onFormSubmitSuccess }) => {
         setLoading(false);
       };
       fetchLessonData();
+    } else {
+      // For new lessons, ensure URLs are null initially
+      setImageUrlToSubmit(null);
+      setAudioUrlToSubmit(null);
     }
   }, [isEditMode, lessonId, langId, setValue, navigate]);
 
-  const uploadFile = async (file, type) => {
-    if (!file) return null;
-    const toastId = toast.loading(`Uploading ${type}...`);
-    // Path: lessons/{langId}/{lessonId_or_timestamp}/{filename}
-    const fileName = `${Date.now()}_${file.name}`;
-    const storagePath = `lessons/${langId || 'unknown_lang'}/${lessonId || 'new_lesson'}/${type}s/${fileName}`;
-    const storageRef = ref(storage, storagePath);
+  const handleImageUploadSuccess = (url) => {
+    setImageUrlToSubmit(url);
+    toast.success('Image uploaded and ready to be saved with the lesson.');
+  };
 
-    return new Promise((resolve, reject) => {
-      const uploadTask = uploadBytesResumable(storageRef, file);
-      uploadTask.on(
-        'state_changed',
-        (snapshot) => {
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          setUploadProgress(prev => ({ ...prev, [type]: progress }));
-          toast.loading(`Uploading ${type}: ${progress.toFixed(0)}%`, { id: toastId });
-        },
-        (error) => {
-          console.error(`Error uploading ${type}:`, error);
-          toast.error(`Failed to upload ${type}.`, { id: toastId });
-          reject(error);
-        },
-        async () => {
-          try {
-            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-            toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} uploaded!`, { id: toastId });
-            resolve(downloadURL);
-          } catch (error) {
-            console.error(`Error getting download URL for ${type}:`, error);
-            toast.error(`Failed to get ${type} URL.`, { id: toastId });
-            reject(error);
-          }
-        }
-      );
-    });
+  const handleAudioUploadSuccess = (url) => {
+    setAudioUrlToSubmit(url);
+    toast.success('Audio uploaded and ready to be saved with the lesson.');
+  };
+
+  const handleUploadError = (error, fileType) => {
+    toast.error(`${fileType.charAt(0).toUpperCase() + fileType.slice(1)} upload failed: ${error.message}`);
   };
 
   const onSubmit = async (data) => {
@@ -121,23 +91,14 @@ const LessonEditorForm = ({ lessonId, langId, onFormSubmitSuccess }) => {
       return;
     }
     setLoading(true);
-    let imageUrl = existingImageUrl;
-    let audioUrl = existingAudioUrl;
 
     try {
-      if (data.imageFile && data.imageFile[0]) {
-        imageUrl = await uploadFile(data.imageFile[0], 'image');
-      }
-      if (data.audioFile && data.audioFile[0]) {
-        audioUrl = await uploadFile(data.audioFile[0], 'audio');
-      }
-
       const lessonData = {
         title: data.title,
         textContent: data.textContent,
-        langId: data.languageId, // Ensure languageId is part of the data
-        imageUrl: imageUrl || null,
-        audioUrl: audioUrl || null,
+        langId: data.languageId,
+        imageUrl: imageUrlToSubmit || null,
+        audioUrl: audioUrlToSubmit || null,
         updatedAt: serverTimestamp(),
         updatedBy: currentUser.uid,
       };
@@ -149,30 +110,29 @@ const LessonEditorForm = ({ lessonId, langId, onFormSubmitSuccess }) => {
       } else {
         lessonData.createdAt = serverTimestamp();
         lessonData.createdBy = currentUser.uid;
-        lessonData.order = 0; // Default order, might need a better system
+        lessonData.order = 0; // Default order
         const lessonsCollectionRef = collection(db, 'languages', data.languageId, 'lessons');
         const newLessonRef = await addDoc(lessonsCollectionRef, lessonData);
         toast.success('Lesson created successfully!');
-        // Update state for edit mode if needed, or navigate
-        // setIsEditMode(true); // If staying on the page
-        // setLessonId(newLessonRef.id); // If staying on the page
+        // Optionally, update state to reflect new lesson ID if staying on page
+        // setIsEditMode(true);
+        // lessonId = newLessonRef.id; // This won't work directly, need to manage prop/state
       }
       if (onFormSubmitSuccess) onFormSubmitSuccess();
-      reset(); // Reset form fields
-      setExistingImageUrl(null);
-      setExistingAudioUrl(null);
-      // navigate(`/creator-dashboard/lessons/${data.languageId}`); // Navigate to lesson list or dashboard
+      reset();
+      setImageUrlToSubmit(null);
+      setAudioUrlToSubmit(null);
+      // navigate(`/creator-dashboard/content-management`); // Example navigation
 
     } catch (error) {
       console.error('Error saving lesson:', error);
       toast.error(`Failed to save lesson: ${error.message}`);
     } finally {
       setLoading(false);
-      setUploadProgress({ image: 0, audio: 0 });
     }
   };
 
-  if (loading && isEditMode && !existingImageUrl && !existingAudioUrl) { // Initial load for edit mode
+  if (loading && isEditMode && !imageUrlToSubmit && !audioUrlToSubmit && lessonId) { // Check lessonId to ensure it's an actual edit load
     return <div className="p-6 text-center text-gray-500 dark:text-gray-400">Loading lesson details...</div>;
   }
 
@@ -219,63 +179,63 @@ const LessonEditorForm = ({ lessonId, langId, onFormSubmitSuccess }) => {
         {errors.textContent && <p className="mt-1 text-xs text-red-500">{errors.textContent.message}</p>}
       </div>
 
-      {/* Image Upload */}
-      <div className="space-y-1">
-        <label htmlFor="imageFile" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Lesson Image (Optional)</label>
-        {existingImageUrl && (
-          <div className="my-2">
-            <p className="text-xs text-gray-500 dark:text-gray-400">Current image:</p>
-            <img src={existingImageUrl} alt="Current lesson" className="max-h-40 rounded-md shadow" />
-            <button type="button" onClick={() => { setExistingImageUrl(null); setValue('imageFile', null); }} className="mt-1 text-xs text-red-500 hover:text-red-700">Remove current image</button>
+      {/* Image Upload using FileUploadComponent */}
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Lesson Image (Optional)</label>
+        {imageUrlToSubmit && (
+          <div className="my-2 p-2 border border-gray-200 dark:border-gray-700 rounded-md">
+            <p className="text-xs text-gray-500 dark:text-gray-400">Current image preview:</p>
+            <img src={imageUrlToSubmit} alt="Current lesson" className="max-h-40 rounded-md shadow my-1" />
+            <button 
+              type="button" 
+              onClick={() => setImageUrlToSubmit(null)} 
+              className="text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+            >
+              Remove Image
+            </button>
           </div>
         )}
-        {!existingImageUrl && (
-          <input 
-            type="file" 
-            id="imageFile" 
-            {...register('imageFile')} 
-            accept="image/png, image/jpeg, image/gif"
-            className={`mt-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-sky-50 dark:file:bg-sky-700 file:text-sky-700 dark:file:text-sky-100 hover:file:bg-sky-100 dark:hover:file:bg-sky-600 ${errors.imageFile ? 'border-red-500 ring-red-500' : ''}`}
+        {!imageUrlToSubmit && (
+          <FileUploadComponent 
+            fileType="image"
+            onUploadSuccess={handleImageUploadSuccess}
+            onUploadError={(err) => handleUploadError(err, 'image')}
+            storagePath={`lesson_uploads/${currentUser?.uid || 'guest'}/images`}
+            fileNamePrefix={`lesson_${langId || 'anylang'}_${lessonId || Date.now()}_`}
           />
         )}
-        {uploadProgress.image > 0 && uploadProgress.image < 100 && (
-          <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mt-1">
-            <div className="bg-sky-600 h-2.5 rounded-full" style={{ width: `${uploadProgress.image}%` }}></div>
-          </div>
-        )}
-        {errors.imageFile && <p className="mt-1 text-xs text-red-500">{errors.imageFile.message}</p>}
       </div>
 
-      {/* Audio Upload */}
-      <div className="space-y-1">
-        <label htmlFor="audioFile" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Lesson Audio (Optional)</label>
-        {existingAudioUrl && (
-          <div className="my-2">
+      {/* Audio Upload using FileUploadComponent */}
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Lesson Audio (Optional)</label>
+        {audioUrlToSubmit && (
+          <div className="my-2 p-2 border border-gray-200 dark:border-gray-700 rounded-md">
             <p className="text-xs text-gray-500 dark:text-gray-400">Current audio:</p>
-            <audio controls src={existingAudioUrl} className="w-full max-w-xs"></audio>
-            <button type="button" onClick={() => { setExistingAudioUrl(null); setValue('audioFile', null); }} className="mt-1 text-xs text-red-500 hover:text-red-700">Remove current audio</button>
+            <audio controls src={audioUrlToSubmit} className="w-full max-w-xs my-1"></audio>
+            <button 
+              type="button" 
+              onClick={() => setAudioUrlToSubmit(null)} 
+              className="text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+            >
+              Remove Audio
+            </button>
           </div>
         )}
-        {!existingAudioUrl && (
-          <input 
-            type="file" 
-            id="audioFile" 
-            {...register('audioFile')} 
-            accept="audio/mpeg, audio/wav, audio/ogg"
-            className={`mt-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-sky-50 dark:file:bg-sky-700 file:text-sky-700 dark:file:text-sky-100 hover:file:bg-sky-100 dark:hover:file:bg-sky-600 ${errors.audioFile ? 'border-red-500 ring-red-500' : ''}`}
+        {!audioUrlToSubmit && (
+          <FileUploadComponent 
+            fileType="audio"
+            onUploadSuccess={handleAudioUploadSuccess}
+            onUploadError={(err) => handleUploadError(err, 'audio')}
+            storagePath={`lesson_uploads/${currentUser?.uid || 'guest'}/audios`}
+            fileNamePrefix={`lesson_${langId || 'anylang'}_${lessonId || Date.now()}_`}
           />
         )}
-        {uploadProgress.audio > 0 && uploadProgress.audio < 100 && (
-          <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mt-1">
-            <div className="bg-sky-600 h-2.5 rounded-full" style={{ width: `${uploadProgress.audio}%` }}></div>
-          </div>
-        )}
-        {errors.audioFile && <p className="mt-1 text-xs text-red-500">{errors.audioFile.message}</p>}
       </div>
 
       <button 
         type="submit" 
-        disabled={loading || uploadProgress.image > 0 && uploadProgress.image < 100 || uploadProgress.audio > 0 && uploadProgress.audio < 100}
+        disabled={loading} // FileUploadComponent handles its own loading state for uploads
         className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-marine-blue hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 disabled:bg-gray-400 dark:disabled:bg-gray-600 transition-colors"
       >
         {loading ? 'Saving...' : (isEditMode ? 'Update Lesson' : 'Create Lesson')}
