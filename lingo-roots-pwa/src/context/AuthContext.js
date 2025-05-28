@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { auth, db } from '../services/firebase'; // Corrected import path
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, getIdTokenResult } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, getIdTokenResult, sendPasswordResetEmail } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 
 const AuthContext = createContext();
@@ -10,7 +10,7 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }) {
-  const [authUser, setAuthUser] = useState(null); // Renamed currentUser to authUser
+  const [currentUser, setCurrentUser] = useState(null); // Renamed back to currentUser for consistency
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState(null);
 
@@ -43,27 +43,27 @@ export function AuthProvider({ children }) {
   }
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setAuthUser(user); // Updated to setAuthUser
-      if (user) {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => { // Renamed user to currentUser
+      setCurrentUser(currentUser); // Updated to setCurrentUser
+      if (currentUser) { // Renamed user to currentUser
         try {
           // Prioritize custom claims for role
-          const idTokenResult = await getIdTokenResult(user);
+          const idTokenResult = await getIdTokenResult(currentUser); // Renamed user to currentUser
           const claimsRole = idTokenResult.claims.role;
 
           if (claimsRole) {
             setUserRole(claimsRole);
             // Optionally, update Firestore if claims are canonical and Firestore is a mirror
-            // const userDocRef = doc(db, 'users', user.uid);
+            // const userDocRef = doc(db, 'users', currentUser.uid);
             // await setDoc(userDocRef, { role: claimsRole }, { merge: true });
           } else {
             // Fallback to Firestore if no role claim is present
-            const userDocRef = doc(db, 'users', user.uid);
+            const userDocRef = doc(db, 'users', currentUser.uid); // Renamed user to currentUser
             const userDocSnap = await getDoc(userDocRef);
             if (userDocSnap.exists()) {
               setUserRole(userDocSnap.data().role);
             } else {
-              console.warn("No user document found in Firestore for UID:", user.uid);
+              console.warn("No user document found in Firestore for UID:", currentUser.uid); // Renamed user to currentUser
               setUserRole(null); // Or a default/guest role
             }
           }
@@ -80,12 +80,17 @@ export function AuthProvider({ children }) {
     return unsubscribe;
   }, []);
 
+  const sendPasswordReset = (email) => {
+    return sendPasswordResetEmail(auth, email);
+  };
+
   const value = {
-    user: authUser, // Updated to authUser
-    role: userRole,
+    currentUser, // Changed from user: authUser
+    userRole, // Changed from role: userRole
     signup,
     login,
     logout,
+    sendPasswordReset, // Added sendPasswordReset
     loading
   };
 

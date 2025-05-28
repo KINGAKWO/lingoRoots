@@ -8,6 +8,7 @@ import { Toaster } from 'react-hot-toast'; // Import Toaster
 // Page Components
 import SignUp from './pages/SignUp';
 import SignIn from './pages/SignIn';
+import ForgotPassword from './pages/ForgotPassword'; // Add this line
 import LandingPage from './components/LandingPage/LandingPage';
 import AboutPage from './components/AboutPage';
 import LanguageDashboard from './components/LanguageDashboards';
@@ -16,7 +17,7 @@ import LanguageSelectionPage from './pages/LanguageSelectionPage'; // Assuming t
 import LessonListPage from './pages/LessonListPage'; // Assuming this is a new page
 import LessonPage from './pages/LessonPage'; // Correcting path for LessonPage
 import LanguageSelector from './components/LanguageSelector';
-import ProtectedRoute from './components/ProtectedRoute';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 import QuizViewComponent from './pages/quiz/QuizViewComponent'; // Import the new QuizViewComponent
 import FlashcardTrainerComponent from './pages/flashcards/FlashcardTrainerComponent'; // Import FlashcardTrainerComponent
 import UserProfilePage from './pages/user/UserProfilePage'; // Import UserProfilePage
@@ -55,6 +56,7 @@ function AppRoutes() {
       <Route path="/" element={currentUser ? <Navigate to={defaultAuthenticatedPath} replace /> : <LandingPage />} />
       <Route path="/signin" element={currentUser ? <Navigate to={defaultAuthenticatedPath} replace /> : <SignIn />} />
       <Route path="/signup" element={currentUser ? <Navigate to={defaultAuthenticatedPath} replace /> : <SignUp />} />
+      <Route path="/forgot-password" element={currentUser ? <Navigate to={defaultAuthenticatedPath} replace /> : <ForgotPassword />} /> {/* Add this route */}
       <Route path="/about" element={<AboutPage />} />
 
       <Route element={<ProtectedRoute />}>
