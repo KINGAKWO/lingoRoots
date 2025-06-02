@@ -3,6 +3,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
+import { getAnalytics } from 'firebase/analytics';
 
 
 // Your web app's Firebase configuration
@@ -14,7 +15,6 @@ const firebaseConfig = {
   messagingSenderId: "100987690274",
   appId: "1:100987690274:web:876393787c77e6f32ad97b"
 };
-
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
 
@@ -22,5 +22,5 @@ export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app); // Added for future use
-
+export const analytics = getAnalytics(app); // Added for future use
 export default app; // You can still export app if needed directly

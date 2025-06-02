@@ -1,6 +1,7 @@
 // src/components/ProgressTracker.jsx
 import React, { useEffect, useState } from 'react';
 import { getUserProgress } from '../services/progressService';
+import { awardAchievement } from '../services/achievementsService';
 
 const ProgressTracker = ({ userId }) => {
   const [progress, setProgress] = useState({
@@ -13,6 +14,7 @@ const ProgressTracker = ({ userId }) => {
     const fetchProgress = async () => {
       const userProgress = await getUserProgress(userId);
       setProgress(userProgress);
+      await awardAchievement(currentUser.uid, 'first_lesson', 10);
     };
     fetchProgress();
   }, [userId]);

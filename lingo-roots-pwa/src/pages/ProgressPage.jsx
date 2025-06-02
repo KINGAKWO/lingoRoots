@@ -2,6 +2,7 @@
 import React from 'react';
 import ProgressTracker from '../components/ProgressTracker';
 import { useAuth } from '../contexts/AuthContext';
+import { awardAchievement } from '../services/achievementsService';
 
 const ProgressPage = () => {
   const { currentUser } = useAuth();
