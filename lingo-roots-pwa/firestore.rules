@@ -54,6 +54,12 @@ service cloud.firestore {
                           getUserRole(request.auth.uid) == 'admin');
       }
 
+      match /databases/{database}/documents {
+        match /progress/{userId} {
+          allow read, write: if request.auth != null && request.auth.uid == userId;
+        }
+       }
+
       // Quizzes subcollection
       match /quizzes/{quizId} {
         // Learners can read quizzes.
