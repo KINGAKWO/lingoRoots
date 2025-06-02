@@ -39,3 +39,13 @@ export const completeMilestone = async (uid, milestoneId) => {
     milestonesCompleted: arrayUnion(milestoneId)
   });
 };
+
+export const updateLeaderboard = async (uid, displayName, points, badges) => {
+    const ref = doc(db, 'leaderboards', uid);
+    await setDoc(ref, {
+      uid,
+      displayName,
+      points,
+      badges
+    });
+  };
