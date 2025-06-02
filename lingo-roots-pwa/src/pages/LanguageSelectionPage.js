@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-// Assuming firebase services are initialized in 'src/services/firebase.js'
-// and AuthContext is in 'src/context/AuthContext.js'
 import { db } from '../services/firebase'; // Adjust path if necessary
 import { AuthContext } from '../context/AuthContext'; // Adjust path if necessary
 import { collection, getDocs, doc, updateDoc, arrayUnion, arrayRemove, getDoc } from 'firebase/firestore';
+import { getLanguages } from '../services/languageService';
 
-// Placeholder for an icon component or library
+
 const LanguageIcon = ({ langCode }) => {
   // In a real app, you might use SVGs or a library like react-icons
   // For now, a simple placeholder
