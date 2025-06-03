@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom'; // Import Link for navigation
 import { FaPlusSquare, FaEdit, FaListAlt, FaChalkboardTeacher, FaQuestionCircle, FaUserShield } from 'react-icons/fa'; // Example icons
+import './CreatorDashboardPage.css'; // Import the CSS file
+import CMSLayout from '../layouts/CMSLayout';
 
 const CreatorDashboardPage = () => {
   // Placeholder for user role check, actual implementation will be in App.js or a HOC
@@ -18,6 +20,7 @@ const CreatorDashboardPage = () => {
   ];
 
   return (
+    <CMSLayout>
     <div className="min-h-screen bg-light-gray p-4 sm:p-6 lg:p-8">
       <header className="mb-8">
         <h1 className="text-3xl font-bold text-marine-blue">Creator Dashboard</h1>
@@ -45,6 +48,8 @@ const CreatorDashboardPage = () => {
         <p className="text-gray-600">Quizzes: 25</p>
       </div>
     </div>
+    {/* Remove CreatorDashboard component since it's not defined */}
+    </CMSLayout>
   );
 };
 

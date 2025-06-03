@@ -86,6 +86,14 @@ function AppRoutes() {
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
       </Route>
+
+       <Route path="/creator-dashboard"
+        element={
+          <ProtectedRoute requiredRole="contentCreator">
+            <CreatorDashboardPage />
+          </ProtectedRoute>
+        }
+      />
       
       {currentUser && <Route path="/*" element={<Navigate to={defaultAuthenticatedPath} replace />} />}
       {!currentUser && <Route path="/*" element={<Navigate to="/" replace />} />}
